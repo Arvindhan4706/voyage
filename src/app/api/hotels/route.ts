@@ -16,11 +16,8 @@ async function getHotelsFromOSM(lat: number, lon: number): Promise<any[]> {
   // Use Overpass API to get real hotels from OpenStreetMap
   const overpassQuery = `
     [out:json][timeout:10];
-    (
-      node["tourism"="hotel"](around:8000,${lat},${lon});
-      way["tourism"="hotel"](around:8000,${lat},${lon});
-    );
-    out body 8;
+    nwr["tourism"~"hotel|resort"](around:15000,${lat},${lon});
+    out center 15;
   `;
   
   const overpassRes = await fetch("https://overpass-api.de/api/interpreter", {
@@ -35,27 +32,32 @@ async function getHotelsFromOSM(lat: number, lon: number): Promise<any[]> {
   return elements
     .filter((el: any) => el.tags?.name)
     .slice(0, 6)
-    .map((el: any, idx: number) => ({
-      id: el.id?.toString(),
-      name: el.tags.name,
-      location: [el.tags["addr:city"], el.tags["addr:country"]].filter(Boolean).join(", ") || "Local Area",
-      stars: el.tags.stars || String(Math.floor(Math.random() * 3) + 3),
-      website: el.tags.website || null,
-      phone: el.tags.phone || null,
-      lat: el.lat || lat,
-      lon: el.lon || lon,
-      // Estimate price based on stars
-      price: el.tags.stars
-        ? Math.round(1500 * parseInt(el.tags.stars) * (0.8 + Math.random() * 0.4))
-        : Math.round(2000 + Math.random() * 8000),
-      ratings: +(3.5 + Math.random() * 1.5).toFixed(1),
-      amenities: JSON.stringify([
-        el.tags.internet_access === "wlan" ? "Free WiFi" : "WiFi",
-        el.tags["addr:city"] ? "City Center" : "Near Attractions",
-        "24hr Reception",
-        idx % 2 === 0 ? "Pool" : "Restaurant",
-      ]),
-    }));
+    .map((el: any, idx: number) => {
+      const elLat = el.lat || el.center?.lat || lat;
+      const elLon = el.lon || el.center?.lon || lon;
+      
+      return {
+        id: el.id?.toString(),
+        name: el.tags.name,
+        location: [el.tags["addr:city"], el.tags["addr:country"]].filter(Boolean).join(", ") || "Local Area",
+        stars: el.tags.stars || String(Math.floor(Math.random() * 3) + 3),
+        website: el.tags.website || null,
+        phone: el.tags.phone || null,
+        lat: elLat,
+        lon: elLon,
+        // Estimate price based on stars
+        price: el.tags.stars
+          ? Math.round(1500 * parseInt(el.tags.stars) * (0.8 + Math.random() * 0.4))
+          : Math.round(2000 + Math.random() * 8000),
+        ratings: +(3.5 + Math.random() * 1.5).toFixed(1),
+        amenities: JSON.stringify([
+          el.tags.internet_access === "wlan" ? "Free WiFi" : "WiFi",
+          el.tags["addr:city"] ? "City Center" : "Near Attractions",
+          "24hr Reception",
+          idx % 2 === 0 ? "Pool" : "Restaurant",
+        ]),
+      };
+    });
 }
 
 export async function GET(req: NextRequest) {
@@ -76,8 +78,8 @@ export async function GET(req: NextRequest) {
       // Fallback: broader area search
       const broadQuery = `
         [out:json][timeout:10];
-        node["tourism"~"hotel|hostel|motel|guest_house"](around:15000,${coords.lat},${coords.lon});
-        out body 8;
+        nwr["tourism"~"hotel|hostel|motel|guest_house|resort"](around:30000,${coords.lat},${coords.lon});
+        out center 15;
       `;
       const fallbackRes = await fetch("https://overpass-api.de/api/interpreter", {
         method: "POST",
@@ -96,8 +98,8 @@ export async function GET(req: NextRequest) {
           price: Math.round(1500 + Math.random() * 7000),
           ratings: +(3.5 + Math.random() * 1.5).toFixed(1),
           amenities: JSON.stringify(["WiFi", "Breakfast", "Reception"]),
-          lat: el.lat,
-          lon: el.lon,
+          lat: el.lat || el.center?.lat || coords.lat,
+          lon: el.lon || el.center?.lon || coords.lon,
         }));
       return NextResponse.json(fallbackHotels);
     }
