@@ -8,13 +8,18 @@ export default function AITripGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [itinerary, setItinerary] = useState<any>(null);
 
-  const [source, setSource] = useState("Chennai");
-  const [destination, setDestination] = useState("Bali");
-  const [budget, setBudget] = useState("₹25,000");
-  const [duration, setDuration] = useState("4 Days");
+  const [source, setSource] = useState("");
+  const [destination, setDestination] = useState("");
+  const [budget, setBudget] = useState("");
+  const [duration, setDuration] = useState("");
   const [style, setStyle] = useState("Adventure");
 
   const handleGenerate = async () => {
+    if (!source || !destination || !budget || !duration) {
+      alert("Please fill in all details (Source, Destination, Budget, Duration) to generate a real-time itinerary.");
+      return;
+    }
+    
     setIsGenerating(true);
     setItinerary(null);
     
@@ -70,7 +75,7 @@ export default function AITripGenerator() {
               <label className="text-xs font-bold text-gray-500 mb-1 block">BUDGET</label>
               <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg p-2">
                 <IndianRupee size={16} className="text-gray-400" />
-                <input type="text" value={budget} onChange={e => setBudget(e.target.value)} className="bg-transparent border-none outline-none text-white w-full text-sm" />
+                <input type="text" value={budget} onChange={e => setBudget(e.target.value)} placeholder="e.g. ₹25000" className="bg-transparent border-none outline-none text-white w-full text-sm" />
               </div>
             </div>
             
@@ -78,7 +83,7 @@ export default function AITripGenerator() {
               <label className="text-xs font-bold text-gray-500 mb-1 block">DURATION</label>
               <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg p-2">
                 <Calendar size={16} className="text-gray-400" />
-                <input type="text" value={duration} onChange={e => setDuration(e.target.value)} className="bg-transparent border-none outline-none text-white w-full text-sm" />
+                <input type="text" value={duration} onChange={e => setDuration(e.target.value)} placeholder="e.g. 4 Days" className="bg-transparent border-none outline-none text-white w-full text-sm" />
               </div>
             </div>
 

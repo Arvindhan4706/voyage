@@ -1,32 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Real trending destinations from Wikipedia - proven popular tourist spots
-const TRENDING_QUERIES = [
-  "Bali island tourism",
-  "Santorini island Greece",
-  "Kyoto Japan",
-  "Machu Picchu Peru",
-  "Amalfi Coast Italy",
-  "Goa India tourism",
-  "Maldives tourism",
-  "Swiss Alps tourism",
+// Dynamic keywords to seed the live Wikipedia search
+const SEED_KEYWORDS = [
+  "popular tourist destination island",
+  "historic city tourism",
+  "mountain resort town",
+  "famous beach destination",
+  "cultural capital tourism",
+  "national park travel",
 ];
 
 async function getDestinationData(query: string) {
   try {
-    // Wikipedia summary
-    const titleSlug = query.split(" ").slice(0, 2).join("_");
+    const titleSlug = query.split(" ").slice(0, 3).join("_");
     const sumRes = await fetch(
       `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(titleSlug)}`,
       { headers: { "User-Agent": "VoyageAI/1.0" } }
     );
     const sum = await sumRes.json();
-    if (!sum.title) return null;
+    if (!sum.title || sum.type === "disambiguation") return null;
 
     let lat = sum.coordinates?.lat;
     let lon = sum.coordinates?.lon;
 
-    // Geocode if no coordinates
     if (!lat || !lon) {
       const geoRes = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(sum.title)}&format=json&limit=1`,
@@ -39,7 +35,6 @@ async function getDestinationData(query: string) {
       }
     }
 
-    // Live weather
     let weather = "N/A";
     let weatherCode = 0;
     if (lat && lon) {
@@ -56,7 +51,7 @@ async function getDestinationData(query: string) {
     return {
       id: sum.pageid?.toString() || Math.random().toString(),
       name: sum.title,
-      country: sum.description || "",
+      country: sum.description || "Global Destination",
       extract: sum.extract?.slice(0, 160) + "...",
       image: sum.thumbnail?.source?.replace(/\/\d+px-/, "/800px-") || null,
       wikiUrl: sum.content_urls?.desktop?.page,
@@ -76,27 +71,22 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get("q");
 
   try {
-    if (q) {
-      // Search-driven destinations
-      const searchRes = await fetch(
-        `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q + " tourist destination")}&format=json&srlimit=6&origin=*`
-      );
-      const searchData = await searchRes.json();
-      const pages = searchData.query?.search || [];
+    // 100% Dynamic: Pick a random seed keyword, search Wikipedia dynamically, and grab top results
+    const searchQuery = q ? (q + " tourist destination") : SEED_KEYWORDS[Math.floor(Math.random() * SEED_KEYWORDS.length)];
+    const randomOffset = q ? 0 : Math.floor(Math.random() * 20); // Get different results every time if no query
+    
+    const searchRes = await fetch(
+      `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchQuery)}&format=json&srlimit=8&sroffset=${randomOffset}&origin=*`,
+      { cache: "no-store" } // Ensure it's never cached on Vercel
+    );
+    const searchData = await searchRes.json();
+    const pages = searchData.query?.search || [];
 
-      const destinations = (
-        await Promise.all(pages.slice(0, 6).map((p: any) => getDestinationData(p.title)))
-      ).filter(Boolean);
+    const destinations = (
+      await Promise.all(pages.map((p: any) => getDestinationData(p.title)))
+    ).filter(Boolean);
 
-      return NextResponse.json(destinations);
-    } else {
-      // Trending destinations - fetch from Wikipedia
-      const destinations = (
-        await Promise.all(TRENDING_QUERIES.map(getDestinationData))
-      ).filter(Boolean);
-
-      return NextResponse.json(destinations);
-    }
+    return NextResponse.json(destinations.slice(0, 6)); // Return up to 6 real dynamic destinations
   } catch (error) {
     console.error("Destinations error:", error);
     return NextResponse.json([], { status: 500 });
