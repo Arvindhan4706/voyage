@@ -9,8 +9,9 @@ export default function AITripGenerator() {
   const [itinerary, setItinerary] = useState<any>(null);
 
   const [source, setSource] = useState("Chennai");
+  const [destination, setDestination] = useState("Bali");
   const [budget, setBudget] = useState("₹25,000");
-  const [duration, setDuration] = useState("4 Days (December)");
+  const [duration, setDuration] = useState("4 Days");
   const [style, setStyle] = useState("Adventure");
 
   const handleGenerate = async () => {
@@ -21,7 +22,7 @@ export default function AITripGenerator() {
       const res = await fetch("/api/trip", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source, budget, duration, style }),
+        body: JSON.stringify({ source, destination, budget, duration, style }),
       });
       
       const data = await res.json();
@@ -53,7 +54,15 @@ export default function AITripGenerator() {
               <label className="text-xs font-bold text-gray-500 mb-1 block">SOURCE</label>
               <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg p-2">
                 <MapPin size={16} className="text-gray-400" />
-                <input type="text" value={source} onChange={e => setSource(e.target.value)} className="bg-transparent border-none outline-none text-white w-full text-sm" />
+                <input type="text" value={source} onChange={e => setSource(e.target.value)} placeholder="e.g. Chennai" className="bg-transparent border-none outline-none text-white w-full text-sm" />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-gray-500 mb-1 block">DESTINATION</label>
+              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg p-2">
+                <MapPin size={16} className="text-cyan-400" />
+                <input type="text" value={destination} onChange={e => setDestination(e.target.value)} placeholder="e.g. Bali, Paris, Manali" className="bg-transparent border-none outline-none text-white w-full text-sm" />
               </div>
             </div>
 

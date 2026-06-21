@@ -43,8 +43,16 @@ async function getAttractions(destination: string): Promise<string[]> {
 
 async function getWikipediaInfo(destination: string): Promise<string> {
   try {
+    // 1. Search to find the exact page title (avoids disambiguation pages)
+    const searchRes = await fetch(
+      `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(destination + " destination")}&format=json&srlimit=1&origin=*`
+    );
+    const searchData = await searchRes.json();
+    const topPage = searchData.query?.search?.[0]?.title || destination;
+
+    // 2. Fetch the summary for the exact page
     const res = await fetch(
-      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(destination)}`,
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topPage)}`,
       { headers: { "User-Agent": "VoyageAI/1.0" } }
     );
     const data = await res.json();
@@ -54,28 +62,35 @@ async function getWikipediaInfo(destination: string): Promise<string> {
   }
 }
 
-function buildItinerary(attractions: string[], days: number, style: string) {
-  const defaultActivities = {
-    morning: ["Explore local area", "Breakfast at a local café", "Visit town center"],
-    afternoon: ["Museum visit", "Local market tour", "Scenic walk"],
-    evening: ["Sunset viewpoint", "Local cuisine dinner", "Cultural show"],
-  };
+function buildItinerary(attractions: string[], days: number, style: string, destination: string) {
+  const fallbackAttractions = [
+    `Explore ${destination} city center`,
+    `Visit the main ${destination} museum`,
+    `Walk along the ${destination} scenic route`,
+    `Shop at the famous ${destination} market`,
+    `Enjoy sunset at the ${destination} viewpoint`,
+    `Tour the historic district of ${destination}`,
+    `Relax at the local ${destination} park`,
+    `Experience the ${destination} cultural show`,
+  ];
 
+  const sourceAttractions = attractions.length > 0 ? attractions : fallbackAttractions;
+  
   const itinerary = [];
   let attractionIndex = 0;
 
   for (let day = 1; day <= days; day++) {
-    const pick = (list: string[]) => {
-      if (attractionIndex < attractions.length) return attractions[attractionIndex++];
-      return list[Math.floor(Math.random() * list.length)];
+    const pick = () => {
+      if (attractionIndex < sourceAttractions.length) return sourceAttractions[attractionIndex++];
+      return fallbackAttractions[Math.floor(Math.random() * fallbackAttractions.length)];
     };
 
     itinerary.push({
       day,
       title: day === 1 ? "Arrival & Exploration" : day === days ? "Departure Day" : `Day ${day} Adventures`,
-      morning: pick(defaultActivities.morning),
-      afternoon: pick(defaultActivities.afternoon),
-      evening: pick(defaultActivities.evening),
+      morning: pick(),
+      afternoon: pick(),
+      evening: pick(),
     });
   }
   return itinerary;
@@ -126,7 +141,7 @@ export async function POST(req: Request) {
     } catch {}
 
     const budgetNum = parseInt(String(budget).replace(/\D/g, "")) || 25000;
-    const itinerary = buildItinerary(attractions, days, style);
+    const itinerary = buildItinerary(attractions, days, style, targetDest);
 
     return NextResponse.json({
       destination: targetDest,
