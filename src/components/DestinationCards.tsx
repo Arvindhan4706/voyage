@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 export default function DestinationCards() {
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
   const [tagsInput, setTagsInput] = useState("Beach, Nature, Budget");
 
   const fetchRecommendations = async () => {
