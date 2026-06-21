@@ -1,177 +1,235 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, ArrowRight, Search, MapPin, Thermometer, X } from "lucide-react";
-import { useState, useCallback } from "react";
-
-let debounceTimer: ReturnType<typeof setTimeout>;
+import { Plane, Building2, Palmtree, Train, Car, MapPin, Calendar, Users, Search, Sparkles } from "lucide-react";
+import { useState } from "react";
 
 export default function AISearch() {
-  const [query, setQuery] = useState("");
-  const [isSearching, setIsSearching] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
-  const [showResults, setShowResults] = useState(false);
+  const [activeTab, setActiveTab] = useState("flights");
+  const [tripType, setTripType] = useState("one-way");
+  
+  // Search state
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [date, setDate] = useState("");
+  const [returnDate, setReturnDate] = useState("");
 
-  const chips = [
-    "Hill stations near Chennai",
-    "Honeymoon in Maldives",
-    "Budget trip to Goa",
-    "Adventure in Manali",
+  const tabs = [
+    { id: "flights", icon: Plane, label: "Flights" },
+    { id: "hotels", icon: Building2, label: "Hotels" },
+    { id: "packages", icon: Palmtree, label: "Holiday Packages" },
+    { id: "trains", icon: Train, label: "Trains" },
+    { id: "cabs", icon: Car, label: "Cabs" },
   ];
 
-  const searchDestinations = useCallback(async (q: string) => {
-    if (!q.trim() || q.length < 3) {
-      setResults([]);
-      setShowResults(false);
-      return;
-    }
-    setIsSearching(true);
-    setShowResults(true);
-    try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-      const data = await res.json();
-      setResults(data.results || []);
-    } catch {
-      setResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, []);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setQuery(val);
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => searchDestinations(val), 500);
-  };
-
-  const handleChip = (chip: string) => {
-    setQuery(chip);
-    searchDestinations(chip);
+  const handleSearch = () => {
+    // In the future, this can trigger routing or scroll to the AI module
+    const targetId = activeTab === "flights" ? "flights" : 
+                     activeTab === "hotels" ? "hotels" : 
+                     activeTab === "packages" ? "packages" : "home";
+                     
+    const el = document.getElementById(targetId);
+    if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto -mt-24 relative z-30 px-4">
+    <div className="w-full max-w-6xl mx-auto -mt-32 relative z-30 px-4">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.5 }}
-        className="glass-panel p-2 flex items-center gap-2 relative"
+        className="bg-white rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative pb-10"
       >
-        <div className="bg-white/5 p-4 rounded-xl hidden md:flex">
-          <Sparkles className="text-cyan-400" size={24} />
+        {/* Top Tabs */}
+        <div className="flex justify-center bg-white rounded-t-3xl border-b border-gray-100 overflow-x-auto no-scrollbar">
+          <div className="flex w-full max-w-4xl justify-between px-4 py-2">
+            {tabs.map(tab => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex flex-col items-center gap-2 px-4 py-4 relative min-w-[80px] transition-colors ${isActive ? 'text-blue-600' : 'text-gray-500 hover:text-blue-500'}`}
+                >
+                  <Icon size={24} className={isActive ? 'text-blue-600' : 'text-gray-400'} />
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{tab.label}</span>
+                  {isActive && (
+                    <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-1 bg-blue-600 rounded-t-full" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <input
-          type="text"
-          value={query}
-          onChange={handleChange}
-          onKeyDown={(e) => e.key === "Enter" && searchDestinations(query)}
-          placeholder="Search any destination — Bali, Santorini, Manali..."
-          className="flex-1 bg-transparent border-none outline-none text-white text-lg md:text-xl placeholder:text-gray-500 px-4"
-        />
+        {/* Input Area */}
+        <div className="p-8 pb-12 pt-6">
+          <AnimatePresence mode="wait">
+            {activeTab === "flights" && (
+              <motion.div key="flights" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+                
+                {/* Trip Type Radio */}
+                <div className="flex gap-6 items-center text-sm font-bold text-gray-700">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" checked={tripType === "one-way"} onChange={() => setTripType("one-way")} className="accent-blue-600 w-4 h-4" /> One Way
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" checked={tripType === "round-trip"} onChange={() => setTripType("round-trip")} className="accent-blue-600 w-4 h-4" /> Round Trip
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" checked={tripType === "multi-city"} onChange={() => setTripType("multi-city")} className="accent-blue-600 w-4 h-4" /> Multi City
+                  </label>
+                </div>
 
-        {query && (
-          <button onClick={() => { setQuery(""); setResults([]); setShowResults(false); }} className="text-gray-400 hover:text-white p-2">
-            <X size={18} />
-          </button>
-        )}
-
-        <button
-          onClick={() => searchDestinations(query)}
-          disabled={isSearching}
-          className="bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-4 rounded-xl font-bold text-white flex items-center gap-2 hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] transition-all min-w-[140px] justify-center"
-        >
-          {isSearching ? (
-            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
-              <Sparkles size={20} />
-            </motion.div>
-          ) : (
-            <><Search size={20} /> Search</>
-          )}
-        </button>
-
-        {/* Live Results Dropdown */}
-        <AnimatePresence>
-          {showResults && (
-            <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.98 }}
-              transition={{ duration: 0.2 }}
-              className="absolute top-full left-0 right-0 mt-3 glass-panel border border-cyan-500/30 shadow-2xl z-50 max-h-[420px] overflow-y-auto"
-            >
-              {isSearching ? (
-                <div className="p-6 flex flex-col items-center gap-3">
-                  <div className="flex gap-2">
-                    {[0, 1, 2].map((i) => (
-                      <motion.div
-                        key={i}
-                        className="w-3 h-3 bg-cyan-400 rounded-full"
-                        animate={{ y: [0, -10, 0] }}
-                        transition={{ repeat: Infinity, duration: 0.7, delay: i * 0.15 }}
-                      />
-                    ))}
+                {/* Big Search Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-5 border border-gray-200 rounded-xl divide-y md:divide-y-0 md:divide-x divide-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+                  
+                  {/* From */}
+                  <div className="col-span-1 md:col-span-1 p-4 cursor-text hover:bg-blue-50/30 transition-colors rounded-l-xl">
+                    <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1 mb-1 uppercase tracking-wider"><MapPin size={12}/> From</span>
+                    <input type="text" value={from} onChange={e => setFrom(e.target.value)} placeholder="Delhi" className="w-full text-2xl font-black text-gray-900 outline-none bg-transparent placeholder:text-gray-300" />
+                    <span className="text-xs text-gray-400 truncate block mt-1">DEL, Delhi Airport India</span>
                   </div>
-                  <p className="text-gray-400 text-sm">Searching Wikipedia, Weather APIs...</p>
-                </div>
-              ) : results.length > 0 ? (
-                <div className="divide-y divide-white/5">
-                  {results.map((r, i) => (
-                    <motion.div
-                      key={r.id || i}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className="flex gap-4 p-4 hover:bg-white/5 cursor-pointer transition-colors group"
-                      onClick={() => { setQuery(r.name); setShowResults(false); }}
-                    >
-                      {r.image && (
-                        <img src={r.image} alt={r.name} className="w-16 h-14 object-cover rounded-lg shrink-0 group-hover:scale-105 transition-transform" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <MapPin size={12} className="text-cyan-400 shrink-0" />
-                          <h4 className="text-white font-bold text-sm truncate">{r.name}</h4>
-                          {r.weather && (
-                            <span className="ml-auto text-xs text-orange-400 flex items-center gap-1 shrink-0">
-                              <Thermometer size={10} /> {r.weather.temp}
-                            </span>
-                          )}
+
+                  {/* To */}
+                  <div className="col-span-1 md:col-span-1 p-4 cursor-text hover:bg-blue-50/30 transition-colors">
+                    <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1 mb-1 uppercase tracking-wider"><MapPin size={12}/> To</span>
+                    <input type="text" value={to} onChange={e => setTo(e.target.value)} placeholder="Bengaluru" className="w-full text-2xl font-black text-gray-900 outline-none bg-transparent placeholder:text-gray-300" />
+                    <span className="text-xs text-gray-400 truncate block mt-1">BLR, Bengaluru International Airport India</span>
+                  </div>
+
+                  {/* Departure */}
+                  <div className="col-span-1 md:col-span-1 p-4 cursor-text hover:bg-blue-50/30 transition-colors">
+                    <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1 mb-1 uppercase tracking-wider"><Calendar size={12}/> Departure</span>
+                    <div className="flex items-baseline gap-1">
+                      <input type="text" value={date} onChange={e => setDate(e.target.value)} placeholder="18" className="w-12 text-3xl font-black text-gray-900 outline-none bg-transparent placeholder:text-gray-300" />
+                      <span className="text-lg font-bold text-gray-900">Nov'26</span>
+                    </div>
+                    <span className="text-xs text-gray-400 truncate block mt-1">Wednesday</span>
+                  </div>
+
+                  {/* Return */}
+                  <div className="col-span-1 md:col-span-1 p-4 cursor-text hover:bg-blue-50/30 transition-colors" onClick={() => setTripType("round-trip")}>
+                    <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1 mb-1 uppercase tracking-wider"><Calendar size={12}/> Return</span>
+                    {tripType === "round-trip" ? (
+                      <>
+                        <div className="flex items-baseline gap-1">
+                          <input type="text" value={returnDate} onChange={e => setReturnDate(e.target.value)} placeholder="22" className="w-12 text-3xl font-black text-gray-900 outline-none bg-transparent placeholder:text-gray-300" />
+                          <span className="text-lg font-bold text-gray-900">Nov'26</span>
                         </div>
-                        <p className="text-gray-400 text-xs line-clamp-2">{r.extract}</p>
-                        {r.country && <p className="text-cyan-500 text-[10px] mt-1">{r.country}</p>}
-                      </div>
-                    </motion.div>
-                  ))}
+                        <span className="text-xs text-gray-400 truncate block mt-1">Sunday</span>
+                      </>
+                    ) : (
+                      <p className="text-xs text-blue-600 font-bold mt-3">Tap to add a return date for bigger discounts</p>
+                    )}
+                  </div>
+
+                  {/* Travellers & Class */}
+                  <div className="col-span-1 md:col-span-1 p-4 cursor-pointer hover:bg-blue-50/30 transition-colors rounded-r-xl">
+                    <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1 mb-1 uppercase tracking-wider"><Users size={12}/> Travellers & Class</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-black text-gray-900">1</span>
+                      <span className="text-lg font-bold text-gray-900">Traveller</span>
+                    </div>
+                    <span className="text-xs text-gray-600 font-bold block mt-1">Economy/Premium Economy</span>
+                  </div>
+
                 </div>
-              ) : (
-                <div className="p-6 text-center text-gray-500 text-sm">No results. Try a different destination name.</div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+
+                {/* AI Helper Banner */}
+                <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100 p-3 rounded-lg mt-4">
+                  <Sparkles size={16} className="text-blue-500 shrink-0" />
+                  <p className="text-xs text-blue-800 font-medium">Use the <strong className="text-blue-600">Smart Budget Optimizer</strong> and <strong className="text-cyan-600">AI Price Prediction</strong> below to analyze this route in real-time!</p>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === "hotels" && (
+              <motion.div key="hotels" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+                
+                {/* Trip Type Radio */}
+                <div className="flex gap-6 items-center text-sm font-bold text-gray-700">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" checked className="accent-blue-600 w-4 h-4" readOnly /> Upto 5 Rooms
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" className="accent-blue-600 w-4 h-4" readOnly /> Group Booking (6+ Rooms)
+                  </label>
+                </div>
+
+                {/* Big Search Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-4 border border-gray-200 rounded-xl divide-y md:divide-y-0 md:divide-x divide-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
+                  
+                  {/* City/Location */}
+                  <div className="col-span-1 md:col-span-1 p-4 cursor-text hover:bg-blue-50/30 transition-colors rounded-l-xl">
+                    <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1 mb-1 uppercase tracking-wider"><MapPin size={12}/> City, Property name or Location</span>
+                    <input type="text" value={from} onChange={e => setFrom(e.target.value)} placeholder="Goa" className="w-full text-2xl font-black text-gray-900 outline-none bg-transparent placeholder:text-gray-300" />
+                    <span className="text-xs text-gray-400 truncate block mt-1">India</span>
+                  </div>
+
+                  {/* Check-In */}
+                  <div className="col-span-1 md:col-span-1 p-4 cursor-text hover:bg-blue-50/30 transition-colors">
+                    <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1 mb-1 uppercase tracking-wider"><Calendar size={12}/> Check-In</span>
+                    <div className="flex items-baseline gap-1">
+                      <input type="text" placeholder="18" className="w-12 text-3xl font-black text-gray-900 outline-none bg-transparent placeholder:text-gray-300" />
+                      <span className="text-lg font-bold text-gray-900">Nov'26</span>
+                    </div>
+                    <span className="text-xs text-gray-400 truncate block mt-1">Wednesday</span>
+                  </div>
+
+                  {/* Check-Out */}
+                  <div className="col-span-1 md:col-span-1 p-4 cursor-text hover:bg-blue-50/30 transition-colors">
+                    <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1 mb-1 uppercase tracking-wider"><Calendar size={12}/> Check-Out</span>
+                    <div className="flex items-baseline gap-1">
+                      <input type="text" placeholder="20" className="w-12 text-3xl font-black text-gray-900 outline-none bg-transparent placeholder:text-gray-300" />
+                      <span className="text-lg font-bold text-gray-900">Nov'26</span>
+                    </div>
+                    <span className="text-xs text-gray-400 truncate block mt-1">Friday</span>
+                  </div>
+
+                  {/* Rooms & Guests */}
+                  <div className="col-span-1 md:col-span-1 p-4 cursor-pointer hover:bg-blue-50/30 transition-colors rounded-r-xl">
+                    <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1 mb-1 uppercase tracking-wider"><Users size={12}/> Rooms & Guests</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-black text-gray-900">1</span>
+                      <span className="text-lg font-bold text-gray-900">Room</span>
+                      <span className="text-3xl font-black text-gray-900 ml-2">2</span>
+                      <span className="text-lg font-bold text-gray-900">Guests</span>
+                    </div>
+                  </div>
+
+                </div>
+                
+                {/* AI Helper Banner */}
+                <div className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100 p-3 rounded-lg mt-4">
+                  <Sparkles size={16} className="text-purple-500 shrink-0" />
+                  <p className="text-xs text-purple-800 font-medium">Use the <strong className="text-purple-600">Hotel Finder</strong> module below to search OpenStreetMap for real hotels in your chosen city!</p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Fallback for other tabs */}
+            {(activeTab === "packages" || activeTab === "trains" || activeTab === "cabs") && (
+              <motion.div key="other" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="h-32 flex flex-col items-center justify-center border-2 border-dashed border-gray-200 rounded-xl">
+                <p className="text-gray-500 font-bold">Select Flights or Hotels to search</p>
+                <p className="text-xs text-gray-400 mt-2">More categories coming soon.</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* The Huge MMT Style Search Button */}
+        <div className="absolute -bottom-7 left-1/2 -translate-x-1/2">
+          <button 
+            onClick={handleSearch}
+            className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-black text-xl md:text-2xl px-12 md:px-16 py-3 rounded-full shadow-[0_10px_20px_rgba(37,99,235,0.3)] hover:shadow-[0_15px_30px_rgba(37,99,235,0.4)] transition-all flex items-center gap-3 hover:scale-105"
+          >
+            SEARCH
+          </button>
+        </div>
       </motion.div>
 
-      {/* Suggested Chips */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="flex flex-wrap justify-center gap-3 mt-6"
-      >
-        {chips.map((chip) => (
-          <motion.span
-            key={chip}
-            onClick={() => handleChip(chip)}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.97 }}
-            className="text-xs md:text-sm px-4 py-2 rounded-full border border-white/10 bg-white/5 text-gray-400 hover:text-cyan-400 hover:border-cyan-500/30 cursor-pointer transition-colors"
-          >
-            {chip}
-          </motion.span>
-        ))}
-      </motion.div>
     </div>
   );
 }
