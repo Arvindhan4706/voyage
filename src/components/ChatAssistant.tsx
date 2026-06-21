@@ -12,25 +12,53 @@ export default function ChatAssistant() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
+  const getAIResponse = (msg: string): string => {
+    const m = msg.toLowerCase();
+    if (m.includes("budget") || m.includes("cheap") || m.includes("affordable")) {
+      return "For budget travel in India, I recommend Rishikesh (₹10k), Hampi (₹8k), or Ooty (₹10k). International budget picks: Bali & Vietnam! 💰";
+    } else if (m.includes("beach") || m.includes("sea") || m.includes("ocean")) {
+      return "Top beach destinations: Goa 🏖️, Andaman Islands, Varkala Kerala, and Puri! Best time: October–March.";
+    } else if (m.includes("hill") || m.includes("mountain") || m.includes("snow") || m.includes("cold")) {
+      return "For hills & mountains: Manali, Spiti Valley, Darjeeling, Coorg, and Ooty! Best season: April–June & Oct–Nov. 🏔️";
+    } else if (m.includes("honeymoon") || m.includes("couple") || m.includes("romantic")) {
+      return "Best honeymoon spots: Bali 🌴, Santorini, Kerala backwaters, Andaman, and Coorg! Budget: ₹30k–₹80k for a week.";
+    } else if (m.includes("adventure") || m.includes("trek") || m.includes("rafting")) {
+      return "Adventure awaits! Top picks: Rishikesh (rafting), Manali (skiing), Spiti Valley (trekking), Coorg (zip-line). 🏄";
+    } else if (m.includes("july") || m.includes("monsoon") || m.includes("rain")) {
+      return "Best July destinations: Kerala Backwaters 🚢, Coorg (lush green), Ladakh, Rajasthan. Avoid beach destinations in monsoon!";
+    } else if (m.includes("ooty") || m.includes("hidden") || m.includes("offbeat")) {
+      return "Hidden gems near Ooty: Coonoor, Kotagiri, Mudumalai, and Hogenakkal Falls. 🌿 Perfect for a weekend getaway!";
+    } else if (m.includes("visa") || m.includes("passport")) {
+      return "For Indians: Bali (free on arrival), Thailand (free), Sri Lanka (free). Apply for Schengen/UK/USA visas 2–3 months in advance. 🛂";
+    } else if (m.includes("hotel") || m.includes("stay") || m.includes("accomodation")) {
+      return "I recommend booking via verified platforms. For budget: ₹800–₹2000/night. Mid-range: ₹2000–₹6000. Luxury: ₹6000+. 🏨";
+    } else if (m.includes("flight") || m.includes("ticket") || m.includes("fly")) {
+      return "Book flights 3–6 weeks in advance for best prices. Tuesday/Wednesday flights are usually cheapest. Check our Price Prediction section above! ✈️";
+    } else {
+      return "Great question! I can help with destinations, budgets, travel tips, visas, and itinerary planning. Try asking about specific places or travel styles! 🌍";
+    }
+  };
+
   const handleSend = () => {
     if (!input.trim()) return;
     
     // Add user message
     const newMsg = { id: Date.now(), sender: "user", text: input };
+    const currentInput = input;
     setMessages(prev => [...prev, newMsg]);
     setInput("");
     setIsTyping(true);
 
-    // Simulate AI thinking and typing
+    // Smart AI response
     setTimeout(() => {
       const aiResponse = { 
         id: Date.now() + 1, 
         sender: "ai", 
-        text: "Based on your preferences and budget, I highly recommend considering destinations like Bali, Goa, or Phuket. They offer great value and amazing experiences!" 
+        text: getAIResponse(currentInput)
       };
       setMessages(prev => [...prev, aiResponse]);
       setIsTyping(false);
-    }, 1500);
+    }, 1200);
   };
 
   return (
