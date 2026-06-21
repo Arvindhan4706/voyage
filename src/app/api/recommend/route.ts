@@ -43,8 +43,9 @@ export async function POST(req: Request) {
     const { history_tags = ["Travel", "Tourism"] } = body;
 
     // 1. Convert user's unique history into a dynamic Wikipedia search query
-    // E.g., ["Beach", "Nature"] -> "Beach Nature tourist destination"
-    const searchQuery = history_tags.slice(0, 3).join(" ") + " tourist destination";
+    // Enforce that it's an actual location by adding terms like city, island, or region
+    const keywords = history_tags.slice(0, 3).join(" ");
+    const searchQuery = `${keywords} (city OR island OR resort) tourism`;
 
     // 2. Fetch live matching places from Wikipedia
     const searchRes = await fetch(

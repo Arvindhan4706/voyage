@@ -7,16 +7,17 @@ import { useState, useEffect } from "react";
 export default function DestinationCards() {
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasFetched, setHasFetched] = useState(false);
+  const [tagsInput, setTagsInput] = useState("Beach, Nature, Budget");
 
   const fetchRecommendations = async () => {
     setIsLoading(true);
     setHasFetched(true);
+    const tagsArray = tagsInput.split(",").map(t => t.trim()).filter(Boolean);
     try {
       const res = await fetch("/api/recommend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ history_tags: ["Beach", "Nature", "Budget Travel", "Weekend Trips"] }),
+        body: JSON.stringify({ history_tags: tagsArray }),
       });
       const data = await res.json();
       setRecommendations(data);
@@ -41,16 +42,18 @@ export default function DestinationCards() {
         {/* ML Input Panel */}
         <div className="lg:col-span-1 glass-panel p-6 border-l-4 border-purple-500 flex flex-col justify-between">
           <div>
-            <h3 className="font-bold text-white flex items-center gap-2 mb-6"><History className="text-purple-400"/> User History</h3>
-            <div className="space-y-3">
-              <span className="block px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-300">🌊 Beach Preferences</span>
-              <span className="block px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-300">🍃 Nature & Wildlife</span>
-              <span className="block px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-300">💰 Budget Travel</span>
-              <span className="block px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-gray-300">📅 Weekend Trips</span>
-            </div>
+            <h3 className="font-bold text-white flex items-center gap-2 mb-4"><History className="text-purple-400"/> User History</h3>
+            <p className="text-xs text-gray-400 mb-3">Enter your preferences to feed the ML model (comma separated):</p>
+            <textarea 
+              value={tagsInput}
+              onChange={(e) => setTagsInput(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-gray-300 outline-none focus:border-purple-500/50 resize-none"
+              rows={3}
+              placeholder="e.g. Beach, Europe, Luxury, Wildlife"
+            />
           </div>
           
-          <div className="mt-8 pt-6 border-t border-white/10">
+          <div className="mt-6 pt-6 border-t border-white/10">
             <h3 className="font-bold text-white flex items-center gap-2 mb-4"><Network className="text-cyan-400"/> Models Used</h3>
             <div className="space-y-2 text-xs text-gray-400 mb-6">
               <p><strong className="text-cyan-400">Content Based:</strong> Matches Budget, Interests, Season.</p>
