@@ -1,73 +1,151 @@
 import { NextResponse } from "next/server";
 
-// Rule-based itinerary engine (works 100% serverless, no Python needed)
-const destinations: Record<string, any> = {
-  adventure: [
-    { name: "Manali, Himachal Pradesh", budget: "₹18,000 – ₹25,000" },
-    { name: "Rishikesh, Uttarakhand", budget: "₹12,000 – ₹18,000" },
-    { name: "Coorg, Karnataka", budget: "₹15,000 – ₹22,000" },
-    { name: "Spiti Valley", budget: "₹20,000 – ₹30,000" },
-  ],
-  relaxation: [
-    { name: "Goa", budget: "₹15,000 – ₹30,000" },
-    { name: "Alleppey, Kerala", budget: "₹12,000 – ₹20,000" },
-    { name: "Andaman & Nicobar", budget: "₹25,000 – ₹40,000" },
-    { name: "Ooty, Tamil Nadu", budget: "₹10,000 – ₹18,000" },
-  ],
-  "culture & heritage": [
-    { name: "Varanasi, Uttar Pradesh", budget: "₹10,000 – ₹18,000" },
-    { name: "Jaipur, Rajasthan", budget: "₹12,000 – ₹20,000" },
-    { name: "Hampi, Karnataka", budget: "₹8,000 – ₹15,000" },
-    { name: "Mysuru, Karnataka", budget: "₹10,000 – ₹16,000" },
-  ],
-};
+async function getAttractions(destination: string): Promise<string[]> {
+  try {
+    // Get real tourist attractions from Overpass API
+    const geoRes = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destination)}&format=json&limit=1`,
+      { headers: { "User-Agent": "VoyageAI/1.0" } }
+    );
+    const geo = await geoRes.json();
+    if (!geo.length) return [];
 
-const itineraries: Record<string, any[]> = {
-  adventure: [
-    { day: 1, title: "Arrival & Acclimatization", morning: "Check-in to hotel & rest", afternoon: "Explore local market", evening: "Bonfire & orientation" },
-    { day: 2, title: "Trekking Day", morning: "Early morning trek start", afternoon: "Summit & scenic lunch", evening: "Recovery & campfire stories" },
-    { day: 3, title: "River Rafting & Zip-line", morning: "Grade 4 river rafting", afternoon: "Zip-line & rock climbing", evening: "Local cuisine dinner" },
-    { day: 4, title: "Departure", morning: "Sunrise hike", afternoon: "Souvenir shopping", evening: "Return journey begins" },
-  ],
-  relaxation: [
-    { day: 1, title: "Arrival & Beach Walk", morning: "Check-in to resort", afternoon: "Beach walk & coconut water", evening: "Sunset at the shore" },
-    { day: 2, title: "Spa & Wellness", morning: "Ayurvedic massage session", afternoon: "Pool & leisure", evening: "Candlelight seafood dinner" },
-    { day: 3, title: "Boat Cruise", morning: "Houseboat / cruise trip", afternoon: "Water sports (optional)", evening: "Live music at beach shack" },
-    { day: 4, title: "Departure", morning: "Yoga session at sunrise", afternoon: "Final beach visit", evening: "Fly home refreshed" },
-  ],
-  "culture & heritage": [
-    { day: 1, title: "Arrival & Heritage Walk", morning: "Check-in & freshen up", afternoon: "Heritage walking tour", evening: "Classical dance/music show" },
-    { day: 2, title: "Temple & Museum Tour", morning: "Major temple visit at sunrise", afternoon: "State museum & art gallery", evening: "Local street food trail" },
-    { day: 3, title: "Craft Villages & Markets", morning: "Village handicraft workshop", afternoon: "Bazaar shopping", evening: "Cultural storytelling session" },
-    { day: 4, title: "Departure", morning: "Sunrise at heritage site", afternoon: "Light breakfast & packing", evening: "Head home with memories" },
-  ],
-};
+    const { lat, lon } = geo[0];
+
+    const overpassQuery = `
+      [out:json][timeout:8];
+      (
+        node["tourism"~"attraction|museum|viewpoint|artwork|zoo|theme_park"](around:10000,${lat},${lon});
+        node["historic"~"monument|castle|ruins|archaeological_site"](around:10000,${lat},${lon});
+        node["leisure"~"park|nature_reserve|beach"](around:10000,${lat},${lon});
+      );
+      out body 20;
+    `;
+
+    const overpassRes = await fetch("https://overpass-api.de/api/interpreter", {
+      method: "POST",
+      body: `data=${encodeURIComponent(overpassQuery)}`,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+
+    const overpassData = await overpassRes.json();
+    const attractions = (overpassData.elements || [])
+      .filter((el: any) => el.tags?.name)
+      .map((el: any) => el.tags.name)
+      .filter((name: string) => name.length > 2 && name.length < 50)
+      .slice(0, 20);
+
+    return attractions;
+  } catch {
+    return [];
+  }
+}
+
+async function getWikipediaInfo(destination: string): Promise<string> {
+  try {
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(destination)}`,
+      { headers: { "User-Agent": "VoyageAI/1.0" } }
+    );
+    const data = await res.json();
+    return data.extract || "";
+  } catch {
+    return "";
+  }
+}
+
+function buildItinerary(attractions: string[], days: number, style: string) {
+  const defaultActivities = {
+    morning: ["Explore local area", "Breakfast at a local café", "Visit town center"],
+    afternoon: ["Museum visit", "Local market tour", "Scenic walk"],
+    evening: ["Sunset viewpoint", "Local cuisine dinner", "Cultural show"],
+  };
+
+  const itinerary = [];
+  let attractionIndex = 0;
+
+  for (let day = 1; day <= days; day++) {
+    const pick = (list: string[]) => {
+      if (attractionIndex < attractions.length) return attractions[attractionIndex++];
+      return list[Math.floor(Math.random() * list.length)];
+    };
+
+    itinerary.push({
+      day,
+      title: day === 1 ? "Arrival & Exploration" : day === days ? "Departure Day" : `Day ${day} Adventures`,
+      morning: pick(defaultActivities.morning),
+      afternoon: pick(defaultActivities.afternoon),
+      evening: pick(defaultActivities.evening),
+    });
+  }
+  return itinerary;
+}
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const style = (body.style || "adventure").toLowerCase();
+    const { source = "Chennai", destination, budget = "25000", duration = "4", style = "adventure" } = body;
 
-    const styleKey = Object.keys(destinations).find(k => style.includes(k)) || "adventure";
-    const destList = destinations[styleKey];
-    const selectedDest = destList[Math.floor(Math.random() * destList.length)];
-    const days = itineraries[styleKey];
+    // Parse duration
+    const days = parseInt(String(duration).replace(/\D/g, "")) || 4;
 
-    const result = {
-      destination: selectedDest.name,
-      estimated_budget: selectedDest.budget,
-      travel_style: styleKey,
-      days: days,
-      tips: [
-        "Book accommodation at least 2 weeks in advance.",
-        "Carry cash — ATMs may not be available everywhere.",
-        "Download offline maps before you travel.",
-      ],
+    // Determine destination: if not given, infer from style
+    const styleDestinations: Record<string, string> = {
+      adventure: "Manali",
+      relaxation: "Goa",
+      "culture & heritage": "Jaipur",
+      beach: "Goa",
+      mountain: "Manali",
+      spiritual: "Varanasi",
     };
+    const targetDest = destination || styleDestinations[style.toLowerCase()] || "Goa";
 
-    return NextResponse.json(result);
+    // Parallel fetch: attractions from OSM + Wikipedia info
+    const [attractions, wikiInfo] = await Promise.all([
+      getAttractions(targetDest),
+      getWikipediaInfo(targetDest),
+    ]);
+
+    // Live weather for destination
+    let currentWeather = null;
+    try {
+      const geoRes = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(targetDest)}&format=json&limit=1`,
+        { headers: { "User-Agent": "VoyageAI/1.0" } }
+      );
+      const geo = await geoRes.json();
+      if (geo.length > 0) {
+        const wRes = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${geo[0].lat}&longitude=${geo[0].lon}&current_weather=true`
+        );
+        const wData = await wRes.json();
+        if (wData.current_weather) {
+          currentWeather = `${Math.round(wData.current_weather.temperature)}°C`;
+        }
+      }
+    } catch {}
+
+    const budgetNum = parseInt(String(budget).replace(/\D/g, "")) || 25000;
+    const itinerary = buildItinerary(attractions, days, style);
+
+    return NextResponse.json({
+      destination: targetDest,
+      source,
+      estimated_budget: `₹${Math.round(budgetNum * 0.85).toLocaleString()} – ₹${budgetNum.toLocaleString()}`,
+      travel_style: style,
+      current_weather: currentWeather,
+      about: wikiInfo.slice(0, 300) + (wikiInfo.length > 300 ? "..." : ""),
+      real_attractions_found: attractions.length,
+      days: itinerary,
+      tips: [
+        `Best time to visit ${targetDest}: check seasonal weather patterns.`,
+        "Book accommodations at least 2 weeks in advance.",
+        "Carry cash for local vendors and street food.",
+        "Use Google Maps offline for navigation.",
+      ],
+    });
   } catch (error: any) {
-    console.error("Trip Generation Error:", error);
+    console.error("Trip Error:", error);
     return NextResponse.json({ error: "Failed to generate itinerary" }, { status: 500 });
   }
 }

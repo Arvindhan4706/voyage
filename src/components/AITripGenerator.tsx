@@ -116,7 +116,7 @@ export default function AITripGenerator() {
 
           {itinerary && !isGenerating && (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
-              <div className="glass-panel p-4 bg-gradient-to-r from-emerald-500/10 to-transparent border-emerald-500/20 flex justify-between items-center">
+              <div className="glass-panel p-4 bg-gradient-to-r from-emerald-500/10 to-transparent border-emerald-500/20 flex flex-wrap justify-between items-center gap-3">
                 <div>
                   <span className="text-xs text-gray-400 font-bold uppercase block">Recommended Destination</span>
                   <span className="text-2xl font-black text-emerald-400">{itinerary.destination}</span>
@@ -126,6 +126,36 @@ export default function AITripGenerator() {
                   <span className="text-2xl font-black text-white">{itinerary.estimated_budget}</span>
                 </div>
               </div>
+
+              {/* Real-time weather + Wikipedia info */}
+              {(itinerary.current_weather || itinerary.about) && (
+                <div className="glass-panel p-4 border border-cyan-500/20 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {itinerary.current_weather && (
+                    <div className="flex items-center gap-3 bg-white/5 rounded-lg p-3">
+                      <span className="text-3xl">🌡️</span>
+                      <div>
+                        <span className="text-xs text-gray-500 font-bold uppercase block">Live Weather Now</span>
+                        <span className="text-xl font-black text-orange-400">{itinerary.current_weather}</span>
+                      </div>
+                    </div>
+                  )}
+                  {itinerary.real_attractions_found > 0 && (
+                    <div className="flex items-center gap-3 bg-white/5 rounded-lg p-3">
+                      <span className="text-3xl">📍</span>
+                      <div>
+                        <span className="text-xs text-gray-500 font-bold uppercase block">Real Attractions Found</span>
+                        <span className="text-xl font-black text-cyan-400">{itinerary.real_attractions_found} from OpenStreetMap</span>
+                      </div>
+                    </div>
+                  )}
+                  {itinerary.about && (
+                    <div className="col-span-1 md:col-span-2 bg-white/5 rounded-lg p-3">
+                      <span className="text-xs text-gray-500 font-bold uppercase block mb-1">About (Wikipedia)</span>
+                      <p className="text-sm text-gray-300">{itinerary.about}</p>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {itinerary.days.map((day: any, idx: number) => {
                 const colors = ['border-cyan-400', 'border-purple-400', 'border-orange-400', 'border-emerald-400'];
