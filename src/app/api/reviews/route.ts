@@ -1,30 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+
+// In-memory review storage (resets per serverless invocation — acceptable for demo)
+const reviews: any[] = [];
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const destinationId = searchParams.get('destinationId');
+  const hotelId = searchParams.get('hotelId');
+  
+  let filtered = reviews;
+  if (destinationId) filtered = filtered.filter(r => r.destinationId === destinationId);
+  if (hotelId) filtered = filtered.filter(r => r.hotelId === hotelId);
+  
+  return NextResponse.json(filtered);
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = (session.user as any).id;
     const body = await req.json();
 
-    const review = await prisma.review.create({
-      data: {
-        userId,
-        destinationId: body.destinationId,
-        hotelId: body.hotelId,
-        reviewText: body.reviewText,
-        rating: body.rating
-      }
-    });
+    const review = {
+      id: Date.now().toString(),
+      userId: body.userId || "anonymous",
+      destinationId: body.destinationId || null,
+      hotelId: body.hotelId || null,
+      reviewText: body.reviewText,
+      rating: body.rating,
+      createdAt: new Date().toISOString(),
+    };
 
-    // Optionally hit the FastAPI sentiment analysis service here.
-    
+    reviews.push(review);
     return NextResponse.json(review, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
