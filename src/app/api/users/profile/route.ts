@@ -46,14 +46,14 @@ export async function PUT(req: NextRequest) {
       update: {
         budgetPreference: body.budgetPreference,
         travelStyle: body.travelStyle,
-        favoriteDestinations: body.favoriteDestinations,
+        favoriteDestinations: body.favoriteDestinations ? JSON.stringify(body.favoriteDestinations) : undefined,
       },
       create: {
         userId,
         budgetPreference: body.budgetPreference,
         travelStyle: body.travelStyle,
-        favoriteDestinations: body.favoriteDestinations || [],
-        searchHistory: []
+        favoriteDestinations: JSON.stringify(body.favoriteDestinations || []),
+        searchHistory: JSON.stringify([])
       }
     });
 
