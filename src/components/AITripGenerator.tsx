@@ -9,6 +9,7 @@ import Globe3D from "./Globe3D";
 export default function AITripGenerator() {
   const t = useTranslations('AITrip');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [itinerary, setItinerary] = useState<any>(null);
 
   const [source, setSource] = useState("");
@@ -57,6 +58,27 @@ export default function AITripGenerator() {
     };
     
     html2pdf().set(opt).from(element).save();
+  };
+
+  const handleCheckout = async () => {
+    setIsCheckingOut(true);
+    try {
+      const res = await fetch("/api/checkout_sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ destination: itinerary.destination, budget: itinerary.estimated_budget }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Failed to initiate checkout");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsCheckingOut(false);
+    }
   };
 
   return (
@@ -244,8 +266,8 @@ export default function AITripGenerator() {
                 <button onClick={handleExportPDF} className="flex items-center gap-2 bg-white/5 hover:bg-red-500/20 text-gray-300 hover:text-red-400 border border-white/10 hover:border-red-500/50 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
                   PDF Export
                 </button>
-                <button className="flex items-center gap-2 bg-white/5 hover:bg-green-500/20 text-gray-300 hover:text-green-400 border border-white/10 hover:border-green-500/50 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
-                  Excel Export
+                <button onClick={handleCheckout} disabled={isCheckingOut} className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:scale-105 text-white px-6 py-2 rounded-lg text-sm font-black transition-transform shadow-[0_0_20px_rgba(168,85,247,0.4)] disabled:opacity-50">
+                  {isCheckingOut ? <Loader2 size={16} className="animate-spin" /> : "Book This Trip"}
                 </button>
                 <button className="flex items-center gap-2 bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-400 border border-cyan-500/30 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
                   <Calendar size={16} /> Sync Calendar
