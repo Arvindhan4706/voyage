@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Loader2, Mail, Lock, User, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -75,7 +75,7 @@ export default function RegisterPage() {
   };
 
   // Human-made spring animation configurations
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0, scale: 0.95, y: 20 },
     visible: {
       opacity: 1,
@@ -91,7 +91,7 @@ export default function RegisterPage() {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 15 },
     visible: {
       opacity: 1,
