@@ -121,16 +121,16 @@ export default function Header() {
                           {session.user?.name || session.user?.email || "User"}
                         </p>
                       </div>
-                      <Link href="#" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
+                      <Link href="/profile" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
                         <User size={14} /> My Profile
                       </Link>
-                      <Link href="#" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
+                      <Link href="/bookings" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
                         <Briefcase size={14} /> Bookings
                       </Link>
-                      <Link href="#" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
+                      <Link href="/wishlist" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
                         <Heart size={14} /> Wishlist
                       </Link>
-                      <Link href="#" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
+                      <Link href="/settings" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
                         <Settings size={14} /> Settings
                       </Link>
                       <button
