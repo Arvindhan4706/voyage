@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useTranslations } from 'next-intl';
 import { Calendar, Users, IndianRupee, MapPin, Settings, Loader2 } from "lucide-react";
 import { useState } from "react";
+import Globe3D from "./Globe3D";
 
 export default function AITripGenerator() {
   const t = useTranslations('AITrip');
@@ -39,6 +40,23 @@ export default function AITripGenerator() {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const handleExportPDF = async () => {
+    const element = document.getElementById("itinerary-content");
+    if (!element) return;
+    
+    const html2pdf = (await import("html2pdf.js")).default;
+    
+    const opt: any = {
+      margin:       0.5,
+      filename:     `VoyageAI-${destination}-Itinerary.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(element).save();
   };
 
   return (
@@ -132,7 +150,15 @@ export default function AITripGenerator() {
 
           {itinerary && !isGenerating && (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
-              <div className="glass-panel p-4 bg-gradient-to-r from-emerald-500/10 to-transparent border-emerald-500/20 flex flex-wrap justify-between items-center gap-3">
+              
+              {/* Optional 3D Globe Visualization */}
+              {itinerary.coordinates && (
+                <Globe3D lat={itinerary.coordinates.lat} lon={itinerary.coordinates.lon} destinationName={itinerary.destination} />
+              )}
+
+              {/* PDF Wrapper */}
+              <div id="itinerary-content" className="space-y-6 bg-slate-950 p-6 rounded-3xl">
+                <div className="glass-panel p-4 bg-gradient-to-r from-emerald-500/10 to-transparent border-emerald-500/20 flex flex-wrap justify-between items-center gap-3">
                 <div>
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase block">Recommended Destination</span>
                   <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{itinerary.destination}</span>
@@ -211,10 +237,11 @@ export default function AITripGenerator() {
                   </motion.div>
                 );
               })}
+              </div>
 
               {/* Auto Export Tools */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex justify-end gap-3 mt-6">
-                <button className="flex items-center gap-2 bg-white/5 hover:bg-red-500/20 text-gray-300 hover:text-red-400 border border-white/10 hover:border-red-500/50 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                <button onClick={handleExportPDF} className="flex items-center gap-2 bg-white/5 hover:bg-red-500/20 text-gray-300 hover:text-red-400 border border-white/10 hover:border-red-500/50 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
                   PDF Export
                 </button>
                 <button className="flex items-center gap-2 bg-white/5 hover:bg-green-500/20 text-gray-300 hover:text-green-400 border border-white/10 hover:border-green-500/50 px-4 py-2 rounded-lg text-sm font-bold transition-colors">

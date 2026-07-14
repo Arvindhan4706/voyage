@@ -127,6 +127,7 @@ export async function POST(req: Request) {
     ]);
 
     let currentWeather = "Unknown";
+    let coordinates = { lat: 0, lon: 0 };
     try {
       const geoRes = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(targetDest)}&format=json&limit=1`,
@@ -134,6 +135,7 @@ export async function POST(req: Request) {
       );
       const geo = await geoRes.json();
       if (geo.length > 0) {
+        coordinates = { lat: parseFloat(geo[0].lat), lon: parseFloat(geo[0].lon) };
         const wRes = await fetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${geo[0].lat}&longitude=${geo[0].lon}&current_weather=true`
         );
@@ -172,6 +174,7 @@ Do not include any placeholders, output exactly in the requested JSON structure.
     });
 
     const itineraryData = JSON.parse(response.text || "{}");
+    itineraryData.coordinates = coordinates;
 
     return NextResponse.json(itineraryData);
   } catch (error: any) {
