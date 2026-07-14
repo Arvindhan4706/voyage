@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, useScroll } from "framer-motion";
-import { Globe, Menu, ChevronDown } from "lucide-react";
+import { Globe, Menu, ChevronDown, User, Heart, Briefcase, Settings, LogOut } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useTranslations } from 'next-intl';
 import { useSession, signOut } from "next-auth/react";
@@ -11,6 +11,7 @@ import Link from "next/link";
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { scrollYProgress } = useScroll();
   const t = useTranslations('Header');
   const { data: session } = useSession();
@@ -105,12 +106,42 @@ export default function Header() {
 
             <div className="flex items-center gap-3 ml-2">
               {session ? (
-                <button
-                  onClick={() => signOut()}
-                  className={`text-[10px] tracking-[0.1em] uppercase font-semibold border px-4 py-2 rounded-full transition-all duration-300 hover:bg-[#D4AF37] hover:text-white hover:border-[#D4AF37] ${scrolled ? 'border-[#2a2a2a]/20 text-[#2a2a2a] dark:border-white/20 dark:text-gray-100' : 'border-white/30 text-white/90'}`}
-                >
-                  Sign Out
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className={`flex items-center justify-center w-8 h-8 rounded-full border transition-all duration-300 hover:bg-[#D4AF37] hover:text-white hover:border-[#D4AF37] ${scrolled ? 'border-[#2a2a2a]/20 text-[#2a2a2a] dark:border-white/20 dark:text-gray-100' : 'border-white/30 text-white/90'}`}
+                  >
+                    <User size={16} />
+                  </button>
+
+                  {userMenuOpen && (
+                    <div className="absolute top-full right-0 mt-2 w-48 bg-[#faf9f6] dark:bg-[#18181b] border border-[#eaeaea] dark:border-[#333333] rounded-md shadow-xl overflow-hidden py-1 z-50">
+                      <div className="px-4 py-2 border-b border-[#eaeaea] dark:border-[#333333]">
+                        <p className="text-xs font-semibold text-[#2a2a2a] dark:text-[#f3f4f6] truncate">
+                          {session.user?.name || session.user?.email || "User"}
+                        </p>
+                      </div>
+                      <Link href="#" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
+                        <User size={14} /> My Profile
+                      </Link>
+                      <Link href="#" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
+                        <Briefcase size={14} /> Bookings
+                      </Link>
+                      <Link href="#" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
+                        <Heart size={14} /> Wishlist
+                      </Link>
+                      <Link href="#" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
+                        <Settings size={14} /> Settings
+                      </Link>
+                      <button
+                        onClick={() => { signOut(); setUserMenuOpen(false); }}
+                        className="flex w-full items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-red-500 hover:bg-red-500 hover:text-white transition-colors border-t border-[#eaeaea] dark:border-[#333333]"
+                      >
+                        <LogOut size={14} /> Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <Link
                   href="/login"

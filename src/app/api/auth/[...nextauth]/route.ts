@@ -22,17 +22,8 @@ export const authOptions = {
           where: { email: credentials.email }
         });
 
-        // For demo purposes, auto-register if user doesn't exist
         if (!user) {
-          const hashedPassword = await bcrypt.hash(credentials.password, 10);
-          user = await prisma.user.create({
-            data: {
-              email: credentials.email,
-              name: credentials.email.split("@")[0],
-              password: hashedPassword
-            }
-          });
-          return user;
+          throw new Error("Invalid email or password");
         }
 
         if (!user.password) {

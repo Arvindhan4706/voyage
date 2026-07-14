@@ -4,7 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion, Variants } from "framer-motion";
-import { Loader2, Mail, Lock, User, ArrowRight } from "lucide-react";
+import { Loader2, Mail, Lock, User, ArrowRight, X } from "lucide-react";
 import Link from "next/link";
 
 export default function RegisterPage() {
@@ -112,7 +112,14 @@ export default function RegisterPage() {
         initial="hidden"
         animate="visible"
       >
-        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-3xl p-8 shadow-2xl">
+        <div className="bg-card/50 backdrop-blur-xl border border-border rounded-3xl p-8 shadow-2xl relative">
+          <Link 
+            href="/" 
+            className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors p-2 hover:bg-muted/50 rounded-full"
+            aria-label="Close"
+          >
+            <X size={20} />
+          </Link>
           <motion.div variants={itemVariants} className="text-center mb-8">
             <h1 className="text-3xl font-bold tracking-tight mb-2">Create Account</h1>
             <p className="text-muted-foreground">Join Voyage AI to plan your perfect trip</p>
