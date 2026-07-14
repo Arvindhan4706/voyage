@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { GoogleGenAI, Type } from "@google/genai";
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 async function getAttractions(destination: string): Promise<string[]> {
   try {
-    // Get real tourist attractions from Overpass API
     const geoRes = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destination)}&format=json&limit=1`,
       { headers: { "User-Agent": "VoyageAI/1.0" } }
@@ -49,14 +51,12 @@ async function getAttractions(destination: string): Promise<string[]> {
 
 async function getWikipediaInfo(destination: string): Promise<string> {
   try {
-    // 1. Search to find the exact page title (avoids disambiguation pages)
     const searchRes = await fetch(
       `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(destination + " destination")}&format=json&srlimit=1&origin=*`
     );
     const searchData = await searchRes.json();
     const topPage = searchData.query?.search?.[0]?.title || destination;
 
-    // 2. Fetch the summary for the exact page
     const res = await fetch(
       `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topPage)}`,
       { headers: { "User-Agent": "VoyageAI/1.0" } }
@@ -68,49 +68,49 @@ async function getWikipediaInfo(destination: string): Promise<string> {
   }
 }
 
-function buildItinerary(attractions: string[], days: number, style: string, destination: string) {
-  const fallbackAttractions = [
-    `Explore ${destination} city center`,
-    `Visit the main ${destination} museum`,
-    `Walk along the ${destination} scenic route`,
-    `Shop at the famous ${destination} market`,
-    `Enjoy sunset at the ${destination} viewpoint`,
-    `Tour the historic district of ${destination}`,
-    `Relax at the local ${destination} park`,
-    `Experience the ${destination} cultural show`,
-  ];
-
-  const sourceAttractions = attractions.length > 0 ? attractions : fallbackAttractions;
-  
-  const itinerary = [];
-  let attractionIndex = 0;
-
-  for (let day = 1; day <= days; day++) {
-    const pick = () => {
-      if (attractionIndex < sourceAttractions.length) return sourceAttractions[attractionIndex++];
-      return fallbackAttractions[Math.floor(Math.random() * fallbackAttractions.length)];
-    };
-
-    itinerary.push({
-      day,
-      title: day === 1 ? "Arrival & Exploration" : day === days ? "Departure Day" : `Day ${day} Adventures`,
-      morning: pick(),
-      afternoon: pick(),
-      evening: pick(),
-    });
-  }
-  return itinerary;
-}
+const responseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    destination: { type: Type.STRING },
+    source: { type: Type.STRING },
+    estimated_budget: { type: Type.STRING },
+    travel_style: { type: Type.STRING },
+    current_weather: { type: Type.STRING },
+    about: { type: Type.STRING },
+    real_attractions_found: { type: Type.INTEGER },
+    predicted_rating: { type: Type.NUMBER },
+    tips: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING }
+    },
+    days: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          day: { type: Type.INTEGER },
+          title: { type: Type.STRING },
+          morning: { type: Type.STRING },
+          afternoon: { type: Type.STRING },
+          evening: { type: Type.STRING }
+        },
+        required: ["day", "title", "morning", "afternoon", "evening"]
+      }
+    }
+  },
+  required: [
+    "destination", "source", "estimated_budget", "travel_style",
+    "about", "real_attractions_found", "predicted_rating", "tips", "days"
+  ]
+};
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { source = "Chennai", destination, budget = "25000", duration = "4", style = "adventure" } = body;
 
-    // Parse duration
     const days = parseInt(String(duration).replace(/\D/g, "")) || 4;
 
-    // Determine destination: if not given, infer from style
     const styleDestinations: Record<string, string> = {
       adventure: "Manali",
       relaxation: "Goa",
@@ -121,14 +121,12 @@ export async function POST(req: Request) {
     };
     const targetDest = destination || styleDestinations[style.toLowerCase()] || "Goa";
 
-    // Parallel fetch: attractions from OSM + Wikipedia info
     const [attractions, wikiInfo] = await Promise.all([
       getAttractions(targetDest),
       getWikipediaInfo(targetDest),
     ]);
 
-    // Live weather for destination
-    let currentWeather = null;
+    let currentWeather = "Unknown";
     try {
       const geoRes = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(targetDest)}&format=json&limit=1`,
@@ -146,28 +144,36 @@ export async function POST(req: Request) {
       }
     } catch {}
 
-    const budgetNum = parseInt(String(budget).replace(/\D/g, "")) || 25000;
-    
-    // Use ML generated itinerary if available, else build manually
-    const itinerary = buildItinerary(attractions, days, style, targetDest);
+    const prompt = `
+You are an elite, luxury travel concierge AI called Voyage AI.
+Design a highly personalized, premium travel itinerary based on the following parameters:
+- Source: ${source}
+- Destination: ${targetDest}
+- Budget: ₹${budget}
+- Duration: ${days} days
+- Travel Style: ${style}
 
-    return NextResponse.json({
-      destination: targetDest,
-      source,
-      estimated_budget: `₹${Math.round(budgetNum * 0.85).toLocaleString()} – ₹${budgetNum.toLocaleString()}`,
-      travel_style: style,
-      current_weather: currentWeather,
-      about: wikiInfo.slice(0, 300) + (wikiInfo.length > 300 ? "..." : ""),
-      real_attractions_found: attractions.length,
-      days: itinerary,
-      predicted_rating: 4.5,
-      tips: [
-        `Best time to visit ${targetDest}: check seasonal weather patterns.`,
-        "Book accommodations at least 2 weeks in advance.",
-        "Carry cash for local vendors and street food.",
-        "Use Google Maps offline for navigation.",
-      ],
+Use the following real-time data gathered for ${targetDest}:
+- Current Weather: ${currentWeather}
+- Summary: ${wikiInfo}
+- Notable Attractions: ${attractions.join(', ')}
+
+Create a day-by-day luxury itinerary. For each day, provide a title, and highly descriptive, premium activities for morning, afternoon, and evening. 
+Do not include any placeholders, output exactly in the requested JSON structure.
+`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: responseSchema,
+      },
     });
+
+    const itineraryData = JSON.parse(response.text || "{}");
+
+    return NextResponse.json(itineraryData);
   } catch (error: any) {
     console.error("Trip Error:", error);
     return NextResponse.json({ error: "Failed to generate itinerary" }, { status: 500 });
