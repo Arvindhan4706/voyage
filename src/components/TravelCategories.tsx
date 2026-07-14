@@ -1,47 +1,49 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mountain, Waves, Trees, Flame, Utensils, Camera, Car, PawPrint, User, Users, Briefcase, Heart } from "lucide-react";
+import { useTranslations } from 'next-intl';
+import { Mountain, Waves, Flame, Utensils, Camera, Car, PawPrint, User, Users, Briefcase, Heart, TreePine } from "lucide-react";
 
 const categories = [
-  { name: "Adventure", icon: Flame, color: "text-orange-500", bg: "bg-orange-500/10" },
-  { name: "Luxury", icon: Heart, color: "text-pink-500", bg: "bg-pink-500/10" },
-  { name: "Beach", icon: Waves, color: "text-cyan-500", bg: "bg-cyan-500/10" },
-  { name: "Hill Station", icon: Mountain, color: "text-blue-500", bg: "bg-blue-500/10" },
-  { name: "Spiritual", icon: Flame, color: "text-yellow-500", bg: "bg-yellow-500/10" },
-  { name: "Food Tourism", icon: Utensils, color: "text-red-500", bg: "bg-red-500/10" },
-  { name: "Photography", icon: Camera, color: "text-purple-500", bg: "bg-purple-500/10" },
-  { name: "Road Trips", icon: Car, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-  { name: "Wildlife", icon: PawPrint, color: "text-green-500", bg: "bg-green-500/10" },
-  { name: "Solo Travel", icon: User, color: "text-indigo-500", bg: "bg-indigo-500/10" },
-  { name: "Family", icon: Users, color: "text-sky-500", bg: "bg-sky-500/10" },
-  { name: "Business", icon: Briefcase, color: "text-slate-500", bg: "bg-slate-500/10" },
+  { name: "Adventure", icon: Flame },
+  { name: "Luxury", icon: Heart },
+  { name: "Beach", icon: Waves },
+  { name: "Nature", icon: TreePine },
+  { name: "Spiritual", icon: Mountain },
+  { name: "Culinary", icon: Utensils },
+  { name: "Photography", icon: Camera },
+  { name: "Road Trips", icon: Car },
+  { name: "Wildlife", icon: PawPrint },
+  { name: "Solo Travel", icon: User },
+  { name: "Family", icon: Users },
+  { name: "Business", icon: Briefcase },
 ];
 
 export default function TravelCategories() {
+  const t = useTranslations('Categories');
   return (
-    <section className="py-24 max-w-7xl mx-auto px-4 relative z-10">
+    <section className="py-24 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10 border-t border-[#eaeaea] dark:border-[#333333]">
       <div className="text-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-black mb-4">Travel <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-400">Categories</span></h2>
-        <p className="text-gray-400 text-lg">Explore curated experiences built for every type of traveler.</p>
+        <p className="text-[10px] tracking-[0.2em] uppercase text-[#888888] dark:text-[#a3a3a3] font-medium mb-3">{t("subtitle")}</p>
+        <h2 className="text-4xl md:text-5xl font-serif text-[#222222] dark:text-[#faf9f6] mb-4">{t("title")}</h2>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12">
         {categories.map((cat, index) => {
           const Icon = cat.icon;
           return (
             <motion.div
               key={cat.name}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.05 }}
-              className="glass-panel p-6 flex flex-col items-center justify-center gap-4 group hover:bg-white/10 cursor-pointer transition-all hover:scale-105"
+              transition={{ delay: index * 0.05, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col items-center justify-center gap-4 group cursor-pointer"
             >
-              <div className={`w-14 h-14 rounded-full ${cat.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                <Icon size={24} className={cat.color} />
+              <div className="w-16 h-16 rounded-full bg-[#faf9f6] dark:bg-[#18181b] border border-[#eaeaea] dark:border-[#333333] flex items-center justify-center group-hover:border-[#D4AF37] group-hover:bg-[#D4AF37]/5 transition-all duration-500">
+                <Icon size={22} className="text-[#222222] dark:text-[#faf9f6] group-hover:text-[#D4AF37] transition-colors duration-500" strokeWidth={1} />
               </div>
-              <span className="text-sm font-bold text-gray-300 group-hover:text-white text-center">{cat.name}</span>
+              <span className="text-[11px] tracking-widest uppercase font-medium text-[#888888] dark:text-[#a3a3a3] group-hover:text-[#222222] dark:group-hover:text-[#faf9f6] text-center transition-colors duration-500">{cat.name}</span>
             </motion.div>
           );
         })}

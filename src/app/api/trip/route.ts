@@ -22,13 +22,19 @@ async function getAttractions(destination: string): Promise<string[]> {
       out body 20;
     `;
 
-    const overpassRes = await fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST",
-      body: `data=${encodeURIComponent(overpassQuery)}`,
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    });
-
-    const overpassData = await overpassRes.json();
+    let overpassData = { elements: [] };
+    try {
+      const overpassRes = await fetch("https://overpass-api.de/api/interpreter", {
+        method: "POST",
+        body: `data=${encodeURIComponent(overpassQuery)}`,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      });
+      if (overpassRes.ok) {
+        overpassData = await overpassRes.json();
+      }
+    } catch (e) {
+      console.warn("OSM rate limited in trip API:", e);
+    }
     const attractions = (overpassData.elements || [])
       .filter((el: any) => el.tags?.name)
       .map((el: any) => el.tags.name)
@@ -115,6 +121,19 @@ export async function POST(req: Request) {
     };
     const targetDest = destination || styleDestinations[style.toLowerCase()] || "Goa";
 
+    // Call FastAPI ML Backend
+    let mlData = null;
+    try {
+      const mlRes = await fetch("http://127.0.0.1:8000/api/generate_trip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ source, budget: String(budget), duration: String(duration), style }),
+      });
+      if (mlRes.ok) mlData = await mlRes.json();
+    } catch (e) {
+      console.warn("FastAPI backend not reachable", e);
+    }
+
     // Parallel fetch: attractions from OSM + Wikipedia info
     const [attractions, wikiInfo] = await Promise.all([
       getAttractions(targetDest),
@@ -141,17 +160,20 @@ export async function POST(req: Request) {
     } catch {}
 
     const budgetNum = parseInt(String(budget).replace(/\D/g, "")) || 25000;
-    const itinerary = buildItinerary(attractions, days, style, targetDest);
+    
+    // Use ML generated itinerary if available, else build manually
+    const itinerary = mlData?.days || buildItinerary(attractions, days, style, targetDest);
 
     return NextResponse.json({
-      destination: targetDest,
+      destination: mlData?.destination || targetDest,
       source,
-      estimated_budget: `₹${Math.round(budgetNum * 0.85).toLocaleString()} – ₹${budgetNum.toLocaleString()}`,
+      estimated_budget: mlData?.estimated_budget || `₹${Math.round(budgetNum * 0.85).toLocaleString()} – ₹${budgetNum.toLocaleString()}`,
       travel_style: style,
       current_weather: currentWeather,
       about: wikiInfo.slice(0, 300) + (wikiInfo.length > 300 ? "..." : ""),
       real_attractions_found: attractions.length,
       days: itinerary,
+      predicted_rating: mlData?.predicted_rating || 4.5,
       tips: [
         `Best time to visit ${targetDest}: check seasonal weather patterns.`,
         "Book accommodations at least 2 weeks in advance.",

@@ -1,10 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from 'next-intl';
 import { Calendar, Users, IndianRupee, MapPin, Settings, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 export default function AITripGenerator() {
+  const t = useTranslations('AITrip');
   const [isGenerating, setIsGenerating] = useState(false);
   const [itinerary, setItinerary] = useState<any>(null);
 
@@ -57,39 +59,39 @@ export default function AITripGenerator() {
           <div className="space-y-4">
             <div>
               <label className="text-xs font-bold text-gray-500 mb-1 block">SOURCE</label>
-              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg p-2">
+              <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg p-2">
                 <MapPin size={16} className="text-gray-400" />
-                <input type="text" value={source} onChange={e => setSource(e.target.value)} placeholder="e.g. Chennai" className="bg-transparent border-none outline-none text-white w-full text-sm" />
+                <input type="text" value={source} onChange={e => setSource(e.target.value)} placeholder="e.g. Chennai" className="bg-transparent border-none outline-none text-gray-900 dark:text-white w-full text-sm" />
               </div>
             </div>
 
             <div>
               <label className="text-xs font-bold text-gray-500 mb-1 block">DESTINATION</label>
-              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg p-2">
-                <MapPin size={16} className="text-cyan-400" />
-                <input type="text" value={destination} onChange={e => setDestination(e.target.value)} placeholder="e.g. Bali, Paris, Manali" className="bg-transparent border-none outline-none text-white w-full text-sm" />
+              <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg p-2">
+                <MapPin size={16} className="text-cyan-600 dark:text-cyan-400" />
+                <input type="text" value={destination} onChange={e => setDestination(e.target.value)} placeholder="e.g. Bali, Paris, Manali" className="bg-transparent border-none outline-none text-gray-900 dark:text-white w-full text-sm" />
               </div>
             </div>
 
             <div>
               <label className="text-xs font-bold text-gray-500 mb-1 block">BUDGET</label>
-              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg p-2">
+              <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg p-2">
                 <IndianRupee size={16} className="text-gray-400" />
-                <input type="text" value={budget} onChange={e => setBudget(e.target.value)} placeholder="e.g. ₹25000" className="bg-transparent border-none outline-none text-white w-full text-sm" />
+                <input type="text" value={budget} onChange={e => setBudget(e.target.value)} placeholder="e.g. ₹25000" className="bg-transparent border-none outline-none text-gray-900 dark:text-white w-full text-sm" />
               </div>
             </div>
             
             <div>
               <label className="text-xs font-bold text-gray-500 mb-1 block">DURATION</label>
-              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-lg p-2">
+              <div className="flex items-center gap-2 bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg p-2">
                 <Calendar size={16} className="text-gray-400" />
-                <input type="text" value={duration} onChange={e => setDuration(e.target.value)} placeholder="e.g. 4 Days" className="bg-transparent border-none outline-none text-white w-full text-sm" />
+                <input type="text" value={duration} onChange={e => setDuration(e.target.value)} placeholder="e.g. 4 Days" className="bg-transparent border-none outline-none text-gray-900 dark:text-white w-full text-sm" />
               </div>
             </div>
 
             <div>
               <label className="text-xs font-bold text-gray-500 mb-1 block">STYLE</label>
-              <select value={style} onChange={e => setStyle(e.target.value)} className="bg-white/5 border border-white/10 rounded-lg p-2 text-white w-full outline-none text-sm appearance-none cursor-pointer">
+              <select value={style} onChange={e => setStyle(e.target.value)} className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 rounded-lg p-2 text-gray-900 dark:text-white w-full outline-none text-sm appearance-none cursor-pointer">
                 <option>Relaxation</option>
                 <option>Adventure</option>
                 <option>Culture & Heritage</option>
@@ -132,12 +134,16 @@ export default function AITripGenerator() {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
               <div className="glass-panel p-4 bg-gradient-to-r from-emerald-500/10 to-transparent border-emerald-500/20 flex flex-wrap justify-between items-center gap-3">
                 <div>
-                  <span className="text-xs text-gray-400 font-bold uppercase block">Recommended Destination</span>
-                  <span className="text-2xl font-black text-emerald-400">{itinerary.destination}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase block">Recommended Destination</span>
+                  <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{itinerary.destination}</span>
+                </div>
+                <div>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase block">AI Rating (ML)</span>
+                  <span className="text-2xl font-black text-amber-500">★ {itinerary.predicted_rating || 4.5}</span>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs text-gray-400 font-bold uppercase block">Estimated Budget</span>
-                  <span className="text-2xl font-black text-white">{itinerary.estimated_budget}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase block">Estimated Budget</span>
+                  <span className="text-2xl font-black text-gray-900 dark:text-white">{itinerary.estimated_budget}</span>
                 </div>
               </div>
 
@@ -182,23 +188,23 @@ export default function AITripGenerator() {
                     <h4 className="text-2xl font-black mb-4">Day {day.day}: <span className={`${tc} text-lg`}>{day.title}</span></h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {day.morning && (
-                        <div className="bg-white/5 p-4 rounded-lg flex items-center justify-between">
-                          <div><span className="text-xs text-gray-400 block">Morning</span> <strong className="text-sm">{day.morning}</strong></div>
+                        <div className="bg-black/5 dark:bg-white/5 p-4 rounded-lg flex items-center justify-between">
+                          <div><span className="text-xs text-gray-600 dark:text-gray-400 block">Morning</span> <strong className="text-sm text-gray-900 dark:text-white">{day.morning}</strong></div>
                         </div>
                       )}
                       {day.afternoon && (
-                        <div className="bg-white/5 p-4 rounded-lg flex items-center justify-between">
-                          <div><span className="text-xs text-gray-400 block">Afternoon</span> <strong className="text-sm">{day.afternoon}</strong></div>
+                        <div className="bg-black/5 dark:bg-white/5 p-4 rounded-lg flex items-center justify-between">
+                          <div><span className="text-xs text-gray-600 dark:text-gray-400 block">Afternoon</span> <strong className="text-sm text-gray-900 dark:text-white">{day.afternoon}</strong></div>
                         </div>
                       )}
                       {day.evening && (
-                        <div className="bg-white/5 p-4 rounded-lg flex items-center justify-between">
-                          <div><span className="text-xs text-gray-400 block">Evening</span> <strong className="text-sm">{day.evening}</strong></div>
+                        <div className="bg-black/5 dark:bg-white/5 p-4 rounded-lg flex items-center justify-between">
+                          <div><span className="text-xs text-gray-600 dark:text-gray-400 block">Evening</span> <strong className="text-sm text-gray-900 dark:text-white">{day.evening}</strong></div>
                         </div>
                       )}
                       {day.full_day && (
-                        <div className="bg-white/5 p-4 rounded-lg flex items-center justify-between col-span-1 md:col-span-2">
-                          <div><span className="text-xs text-gray-400 block">Full Day</span> <strong className="text-sm">{day.full_day}</strong></div>
+                        <div className="bg-black/5 dark:bg-white/5 p-4 rounded-lg flex items-center justify-between col-span-1 md:col-span-2">
+                          <div><span className="text-xs text-gray-600 dark:text-gray-400 block">Full Day</span> <strong className="text-sm text-gray-900 dark:text-white">{day.full_day}</strong></div>
                         </div>
                       )}
                     </div>

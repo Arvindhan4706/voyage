@@ -20,13 +20,20 @@ async function getHotelsFromOSM(lat: number, lon: number): Promise<any[]> {
     out center 15;
   `;
   
-  const overpassRes = await fetch("https://overpass-api.de/api/interpreter", {
-    method: "POST",
-    body: `data=${encodeURIComponent(overpassQuery)}`,
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  });
+  let overpassData = { elements: [] };
+  try {
+    const overpassRes = await fetch("https://overpass-api.de/api/interpreter", {
+      method: "POST",
+      body: `data=${encodeURIComponent(overpassQuery)}`,
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+    if (overpassRes.ok) {
+      overpassData = await overpassRes.json();
+    }
+  } catch (e) {
+    console.warn("OSM rate limited:", e);
+  }
   
-  const overpassData = await overpassRes.json();
   const elements = overpassData.elements || [];
 
   return elements
@@ -81,12 +88,19 @@ export async function GET(req: NextRequest) {
         nwr["tourism"~"hotel|hostel|motel|guest_house|resort"](around:30000,${coords.lat},${coords.lon});
         out center 15;
       `;
-      const fallbackRes = await fetch("https://overpass-api.de/api/interpreter", {
-        method: "POST",
-        body: `data=${encodeURIComponent(broadQuery)}`,
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      });
-      const fallbackData = await fallbackRes.json();
+      let fallbackData = { elements: [] };
+      try {
+        const fallbackRes = await fetch("https://overpass-api.de/api/interpreter", {
+          method: "POST",
+          body: `data=${encodeURIComponent(broadQuery)}`,
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        });
+        if (fallbackRes.ok) {
+          fallbackData = await fallbackRes.json();
+        }
+      } catch (e) {
+        console.warn("OSM Fallback rate limited:", e);
+      }
       const fallbackHotels = (fallbackData.elements || [])
         .filter((el: any) => el.tags?.name)
         .slice(0, 6)
