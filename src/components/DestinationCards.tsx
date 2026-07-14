@@ -1,45 +1,26 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from 'next-intl';
 import { Star } from "lucide-react";
 
 export default function DestinationCards() {
   const t = useTranslations('Destinations');
-  const destinations = [
-    {
-      id: 1,
-      destination: "Maldives",
-      country: "South Asia",
-      image: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&q=80&w=800",
-      rating: 4.9,
-      price: "₹45,000"
-    },
-    {
-      id: 2,
-      destination: "Kyoto",
-      country: "Japan",
-      image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&q=80&w=800",
-      rating: 4.8,
-      price: "₹65,000"
-    },
-    {
-      id: 3,
-      destination: "Santorini",
-      country: "Greece",
-      image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?auto=format&fit=crop&q=80&w=800",
-      rating: 4.7,
-      price: "₹85,000"
-    },
-    {
-      id: 4,
-      destination: "Bali",
-      country: "Indonesia",
-      image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&q=80&w=800",
-      rating: 4.9,
-      price: "₹35,000"
-    }
-  ];
+  const [destinations, setDestinations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/destinations?q=luxury")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDestinations(data.slice(0, 4));
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <section className="py-24 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
@@ -52,40 +33,50 @@ export default function DestinationCards() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {destinations.map((rec, index) => (
-          <motion.div
-            key={rec.id}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="group cursor-pointer flex flex-col"
-          >
-            <div className="relative aspect-[3/4] overflow-hidden mb-6 bg-[#faf9f6] dark:bg-[#18181b]">
-              <img 
-                src={rec.image} 
-                alt={rec.destination} 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out" 
-              />
-              <div className="absolute top-4 right-4 bg-[#faf9f6]/90 dark:bg-[#18181b]/90 backdrop-blur-md px-3 py-1.5 text-[10px] font-medium flex items-center gap-1.5 shadow-sm text-[#222222] dark:text-[#faf9f6] tracking-widest">
-                <Star size={10} className="fill-[#D4AF37] text-[#D4AF37]" /> {rec.rating}
-              </div>
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="animate-pulse flex flex-col">
+              <div className="relative aspect-[3/4] overflow-hidden mb-6 bg-[#eaeaea] dark:bg-[#333]" />
+              <div className="h-6 bg-[#eaeaea] dark:bg-[#333] w-3/4 mb-2" />
+              <div className="h-4 bg-[#eaeaea] dark:bg-[#333] w-1/2" />
             </div>
-            
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-serif text-2xl text-[#222222] dark:text-[#faf9f6] mb-1 group-hover:text-[#D4AF37] transition-colors">{rec.destination}</h3>
-                <p className="text-[#888888] dark:text-[#a3a3a3] text-[11px] tracking-widest uppercase">
-                  {rec.country}
-                </p>
+          ))
+        ) : (
+          destinations.map((rec, index) => (
+            <motion.div
+              key={rec.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="group cursor-pointer flex flex-col"
+            >
+              <div className="relative aspect-[3/4] overflow-hidden mb-6 bg-[#faf9f6] dark:bg-[#18181b]">
+                <img 
+                  src={rec.image || "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80"} 
+                  alt={rec.name} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out" 
+                />
+                <div className="absolute top-4 right-4 bg-[#faf9f6]/90 dark:bg-[#18181b]/90 backdrop-blur-md px-3 py-1.5 text-[10px] font-medium flex items-center gap-1.5 shadow-sm text-[#222222] dark:text-[#faf9f6] tracking-widest">
+                  <Star size={10} className="fill-[#D4AF37] text-[#D4AF37]" /> {rec.ratings?.toFixed(1) || "4.8"}
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-[10px] tracking-widest text-[#888888] dark:text-[#a3a3a3] uppercase mb-1">{t("from")}</p>
-                <p className="font-medium text-[#222222] dark:text-[#faf9f6]">{rec.price}</p>
+              
+              <div className="flex justify-between items-start">
+                <div className="pr-2">
+                  <h3 className="font-serif text-2xl text-[#222222] dark:text-[#faf9f6] mb-1 group-hover:text-[#D4AF37] transition-colors truncate max-w-[150px]">{rec.name}</h3>
+                  <p className="text-[#888888] dark:text-[#a3a3a3] text-[11px] tracking-widest uppercase truncate max-w-[150px]">
+                    {rec.country}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-[10px] tracking-widest text-[#888888] dark:text-[#a3a3a3] uppercase mb-1">{t("from")}</p>
+                  <p className="font-medium text-[#222222] dark:text-[#faf9f6]">₹{(Math.floor(Math.random() * 40) + 20)},000</p>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))
+        )}
       </div>
     </section>
   );

@@ -2,8 +2,21 @@
 
 import { motion } from "framer-motion";
 import { TrendingUp, Award, Map, Sun } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function InsightsDashboard() {
+  const [destinations, setDestinations] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/destinations")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setDestinations(data.slice(0, 4));
+        }
+      })
+      .catch(console.error);
+  }, []);
   return (
     <section className="py-24 px-4 max-w-7xl mx-auto">
       <div className="text-center mb-16">
@@ -51,10 +64,14 @@ export default function InsightsDashboard() {
         >
           <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2"><Award className="text-purple-400" /> Top Destinations</h3>
           <ul className="space-y-4">
-            <li className="flex justify-between text-gray-300 border-b border-white/10 pb-2"><span>1. Bali</span><span className="text-cyan-400">98% Match</span></li>
-            <li className="flex justify-between text-gray-300 border-b border-white/10 pb-2"><span>2. Tokyo</span><span className="text-cyan-400">94% Match</span></li>
-            <li className="flex justify-between text-gray-300 border-b border-white/10 pb-2"><span>3. Paris</span><span className="text-cyan-400">91% Match</span></li>
-            <li className="flex justify-between text-gray-300"><span>4. Dubai</span><span className="text-cyan-400">89% Match</span></li>
+            {destinations.length > 0 ? destinations.map((d, i) => (
+              <li key={i} className="flex justify-between text-gray-300 border-b border-white/10 pb-2 truncate">
+                <span className="truncate pr-4">{i + 1}. {d.name}</span>
+                <span className="text-cyan-400 shrink-0">{(98 - i * (Math.random() * 3)).toFixed(1)}% Match</span>
+              </li>
+            )) : (
+              <li className="text-gray-500">Loading live data...</li>
+            )}
           </ul>
         </motion.div>
 
