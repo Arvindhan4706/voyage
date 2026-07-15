@@ -130,6 +130,9 @@ export default function Header() {
                       <Link href="/wishlist" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
                         <Heart size={14} /> Wishlist
                       </Link>
+                      <Link href="/admin" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
+                        <Briefcase size={14} /> Admin
+                      </Link>
                       <Link href="/settings" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#2a2a2a] dark:text-[#f3f4f6] hover:bg-[#D4AF37] hover:text-white transition-colors">
                         <Settings size={14} /> Settings
                       </Link>

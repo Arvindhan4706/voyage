@@ -29,9 +29,9 @@ export default function FlightsModule() {
       
       if (data.error) throw new Error(data.error);
       setPrediction(data);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Failed to predict price. Please check destinations.");
+      alert(e.message || "Failed to predict price. Please check destinations.");
     } finally {
       setIsPredicting(false);
     }

@@ -78,7 +78,7 @@ model Review {
 
 model Trip {
   id              String   @id @default(uuid())
-  userId          String
+  userId          String?
   source          String
   destination     String
   budget          Float
@@ -86,7 +86,7 @@ model Trip {
   itineraryData   String // JSON not natively supported in standard SQLite like PG, store as string
   createdAt       DateTime @default(now())
 
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Wishlist {

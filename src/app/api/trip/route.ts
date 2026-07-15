@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server";
-import { GoogleGenAI, Type } from "@google/genai";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 async function getAttractions(destination: string): Promise<string[]> {
   try {
@@ -9,6 +6,7 @@ async function getAttractions(destination: string): Promise<string[]> {
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destination)}&format=json&limit=1`,
       { headers: { "User-Agent": "VoyageAI/1.0" } }
     );
+    if (!geoRes.ok) return [];
     const geo = await geoRes.json();
     if (!geo.length) return [];
 
@@ -68,42 +66,6 @@ async function getWikipediaInfo(destination: string): Promise<string> {
   }
 }
 
-const responseSchema = {
-  type: Type.OBJECT,
-  properties: {
-    destination: { type: Type.STRING },
-    source: { type: Type.STRING },
-    estimated_budget: { type: Type.STRING },
-    travel_style: { type: Type.STRING },
-    current_weather: { type: Type.STRING },
-    about: { type: Type.STRING },
-    real_attractions_found: { type: Type.INTEGER },
-    predicted_rating: { type: Type.NUMBER },
-    tips: {
-      type: Type.ARRAY,
-      items: { type: Type.STRING }
-    },
-    days: {
-      type: Type.ARRAY,
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          day: { type: Type.INTEGER },
-          title: { type: Type.STRING },
-          morning: { type: Type.STRING },
-          afternoon: { type: Type.STRING },
-          evening: { type: Type.STRING }
-        },
-        required: ["day", "title", "morning", "afternoon", "evening"]
-      }
-    }
-  },
-  required: [
-    "destination", "source", "estimated_budget", "travel_style",
-    "about", "real_attractions_found", "predicted_rating", "tips", "days"
-  ]
-};
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -133,15 +95,19 @@ export async function POST(req: Request) {
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(targetDest)}&format=json&limit=1`,
         { headers: { "User-Agent": "VoyageAI/1.0" } }
       );
-      const geo = await geoRes.json();
-      if (geo.length > 0) {
-        coordinates = { lat: parseFloat(geo[0].lat), lon: parseFloat(geo[0].lon) };
-        const wRes = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${geo[0].lat}&longitude=${geo[0].lon}&current_weather=true`
-        );
-        const wData = await wRes.json();
-        if (wData.current_weather) {
-          currentWeather = `${Math.round(wData.current_weather.temperature)}°C`;
+      if (geoRes.ok) {
+        const geo = await geoRes.json();
+        if (geo.length > 0) {
+          coordinates = { lat: parseFloat(geo[0].lat), lon: parseFloat(geo[0].lon) };
+          const wRes = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${geo[0].lat}&longitude=${geo[0].lon}&current_weather=true`
+          );
+          if (wRes.ok) {
+            const wData = await wRes.json();
+            if (wData.current_weather) {
+              currentWeather = `${Math.round(wData.current_weather.temperature)}°C`;
+            }
+          }
         }
       }
     } catch {}
@@ -161,24 +127,107 @@ Use the following real-time data gathered for ${targetDest}:
 - Notable Attractions: ${attractions.join(', ')}
 
 Create a day-by-day luxury itinerary. For each day, provide a title, and highly descriptive, premium activities for morning, afternoon, and evening. 
-Do not include any placeholders, output exactly in the requested JSON structure.
+Do not include any placeholders.
+
+OUTPUT STRICTLY IN THE FOLLOWING JSON FORMAT ONLY:
+{
+  "destination": "string",
+  "source": "string",
+  "estimated_budget": "string",
+  "travel_style": "string",
+  "current_weather": "string",
+  "about": "string",
+  "real_attractions_found": number,
+  "predicted_rating": number,
+  "tips": ["string"],
+  "days": [
+    {
+      "day": number,
+      "title": "string",
+      "morning": "string",
+      "afternoon": "string",
+      "evening": "string",
+      "full_day": "string (optional)"
+    }
+  ]
+}
 `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: responseSchema,
-      },
-    });
+    const mockFallback = {
+      destination: targetDest,
+      source: source,
+      estimated_budget: `₹${budget}`,
+      travel_style: style,
+      current_weather: currentWeather,
+      about: wikiInfo || `Experience the beauty of ${targetDest} on this luxury getaway.`,
+      real_attractions_found: attractions.length,
+      predicted_rating: 4.8,
+      coordinates,
+      tips: ["Book luxury transport in advance", "Try local premium dining", "Pack accordingly for the weather"],
+      days: [
+        {
+          day: 1,
+          title: "Arrival & Orientation",
+          morning: "Arrive via luxury transfer and check into a 5-star suite.",
+          afternoon: "Enjoy a premium spa session to unwind from the flight.",
+          evening: "Exclusive fine dining experience with panoramic views."
+        },
+        {
+          day: 2,
+          title: "Exploration & Culture",
+          morning: `Private guided tour of top attractions including ${attractions[0] || 'local landmarks'}.`,
+          afternoon: "Helicopter or premium yacht tour of the surrounding landscapes.",
+          evening: "Sunset cocktails followed by a traditional premium dinner."
+        },
+        {
+          day: 3,
+          title: "Leisure & Departure",
+          morning: "Breakfast in bed followed by private shopping or leisure.",
+          afternoon: "Luxury transport back to the airport.",
+          evening: "Safe travels."
+        }
+      ]
+    };
 
-    const itineraryData = JSON.parse(response.text || "{}");
-    itineraryData.coordinates = coordinates;
+    try {
+      // Add timeout signal (AbortController not available natively in all Edge environments, but standard fetch supports signal)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
 
-    return NextResponse.json(itineraryData);
+      const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [{ role: "user", content: prompt }],
+          response_format: { type: "json_object" },
+          temperature: 0.7,
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (!groqRes.ok) {
+        throw new Error("Groq API failed");
+      }
+
+      const groqData = await groqRes.json();
+      const content = groqData.choices[0].message.content;
+      const itineraryData = JSON.parse(content || "{}");
+      itineraryData.coordinates = coordinates;
+      
+      // Merge with fallback to ensure no missing keys
+      return NextResponse.json({ ...mockFallback, ...itineraryData });
+    } catch (e) {
+      console.warn("Groq API failed or timed out. Using mock fallback.", e);
+      return NextResponse.json(mockFallback);
+    }
   } catch (error: any) {
-    console.error("Trip Error:", error);
-    return NextResponse.json({ error: "Failed to generate itinerary" }, { status: 500 });
+    console.error("Trip Error - Catch All:", error);
+    // Ultimate fallback if even parsing the request fails
+    return NextResponse.json({ error: "Failed to generate itinerary, completely broken." }, { status: 500 });
   }
 }

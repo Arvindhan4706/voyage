@@ -5,12 +5,17 @@ import { useTranslations } from 'next-intl';
 import { Calendar, Users, IndianRupee, MapPin, Settings, Loader2 } from "lucide-react";
 import { useState } from "react";
 import Globe3D from "./Globe3D";
+import TripMap from "./TripMap";
+import FlightInsights from "./FlightInsights";
+import WikipediaImage from "./WikipediaImage";
 
 export default function AITripGenerator() {
   const t = useTranslations('AITrip');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [itinerary, setItinerary] = useState<any>(null);
+  const [chatPrompt, setChatPrompt] = useState("");
+  const [isChatting, setIsChatting] = useState(false);
 
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
@@ -60,6 +65,43 @@ export default function AITripGenerator() {
     html2pdf().set(opt).from(element).save();
   };
 
+  const handleSyncCalendar = () => {
+    if (!itinerary || !itinerary.days) return;
+    let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//Voyage AI//Travel Itinerary//EN\n";
+    
+    const startDate = new Date();
+    
+    itinerary.days.forEach((day: any, i: number) => {
+      const eventDate = new Date(startDate);
+      eventDate.setDate(startDate.getDate() + i);
+      const nextDate = new Date(eventDate);
+      nextDate.setDate(eventDate.getDate() + 1);
+      
+      const formatDT = (d: Date) => d.toISOString().split('T')[0].replace(/-/g, '');
+      
+      const description = `Morning: ${day.morning || ''}\\nAfternoon: ${day.afternoon || ''}\\nEvening: ${day.evening || ''}`.replace(/\n/g, '\\n');
+      
+      icsContent += "BEGIN:VEVENT\n";
+      icsContent += `UID:day${i}-${Date.now()}@voyageai\n`;
+      icsContent += `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z\n`;
+      icsContent += `DTSTART;VALUE=DATE:${formatDT(eventDate)}\n`;
+      icsContent += `DTEND;VALUE=DATE:${formatDT(nextDate)}\n`;
+      icsContent += `SUMMARY:Day ${day.day}: ${day.title}\n`;
+      icsContent += `DESCRIPTION:${description}\n`;
+      icsContent += "END:VEVENT\n";
+    });
+    
+    icsContent += "END:VCALENDAR";
+    
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `VoyageAI-${itinerary.destination.replace(/\s+/g, '-')}-Itinerary.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleCheckout = async () => {
     setIsCheckingOut(true);
     try {
@@ -78,6 +120,50 @@ export default function AITripGenerator() {
       console.error(e);
     } finally {
       setIsCheckingOut(false);
+    }
+  };
+
+  const handleSaveTrip = async () => {
+    try {
+      const res = await fetch("/api/trips", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(itinerary),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const url = `${window.location.origin}/en/trip/${data.id}`;
+        prompt("Trip saved successfully! Share this link:", url);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to save trip.");
+    }
+  };
+
+  const handleChatSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatPrompt.trim() || !itinerary) return;
+    
+    setIsChatting(true);
+    try {
+      const res = await fetch("/api/trip/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ itinerary, prompt: chatPrompt }),
+      });
+      const data = await res.json();
+      if (data.error) {
+        alert(data.error);
+      } else {
+        setItinerary(data);
+        setChatPrompt("");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update itinerary");
+    } finally {
+      setIsChatting(false);
     }
   };
 
@@ -173,9 +259,18 @@ export default function AITripGenerator() {
           {itinerary && !isGenerating && (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
               
-              {/* Optional 3D Globe Visualization */}
+              {/* Interactive 2D Map Visualization */}
               {itinerary.coordinates && (
-                <Globe3D lat={itinerary.coordinates.lat} lon={itinerary.coordinates.lon} destinationName={itinerary.destination} />
+                <div className="mb-8">
+                  <TripMap lat={itinerary.coordinates.lat} lon={itinerary.coordinates.lon} destination={itinerary.destination} />
+                </div>
+              )}
+
+              {/* Error Handling */}
+              {itinerary.error && (
+                <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-xl">
+                  <strong>Generation Error:</strong> {itinerary.error}
+                </div>
               )}
 
               {/* PDF Wrapper */}
@@ -225,54 +320,78 @@ export default function AITripGenerator() {
                 </div>
               )}
 
-              {itinerary.days.map((day: any, idx: number) => {
+              {itinerary.days && itinerary.days.map((day: any, idx: number) => {
                 const colors = ['border-cyan-400', 'border-purple-400', 'border-orange-400', 'border-emerald-400'];
                 const textColors = ['text-cyan-400', 'text-purple-400', 'text-orange-400', 'text-emerald-400'];
                 const c = colors[idx % 4];
                 const tc = textColors[idx % 4];
 
                 return (
-                  <motion.div key={idx} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }} className={`glass-panel p-6 border-l-4 ${c}`}>
-                    <h4 className="text-2xl font-black mb-4">Day {day.day}: <span className={`${tc} text-lg`}>{day.title}</span></h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {day.morning && (
-                        <div className="bg-black/5 dark:bg-white/5 p-4 rounded-lg flex items-center justify-between">
-                          <div><span className="text-xs text-gray-600 dark:text-gray-400 block">Morning</span> <strong className="text-sm text-gray-900 dark:text-white">{day.morning}</strong></div>
-                        </div>
-                      )}
-                      {day.afternoon && (
-                        <div className="bg-black/5 dark:bg-white/5 p-4 rounded-lg flex items-center justify-between">
-                          <div><span className="text-xs text-gray-600 dark:text-gray-400 block">Afternoon</span> <strong className="text-sm text-gray-900 dark:text-white">{day.afternoon}</strong></div>
-                        </div>
-                      )}
-                      {day.evening && (
-                        <div className="bg-black/5 dark:bg-white/5 p-4 rounded-lg flex items-center justify-between">
-                          <div><span className="text-xs text-gray-600 dark:text-gray-400 block">Evening</span> <strong className="text-sm text-gray-900 dark:text-white">{day.evening}</strong></div>
-                        </div>
-                      )}
-                      {day.full_day && (
-                        <div className="bg-black/5 dark:bg-white/5 p-4 rounded-lg flex items-center justify-between col-span-1 md:col-span-2">
-                          <div><span className="text-xs text-gray-600 dark:text-gray-400 block">Full Day</span> <strong className="text-sm text-gray-900 dark:text-white">{day.full_day}</strong></div>
-                        </div>
-                      )}
+                  <motion.div key={idx} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }} className={`glass-panel p-6 border-l-4 ${c} overflow-hidden relative`}>
+                    <WikipediaImage title={day.title} fallbackTitle={itinerary.destination} />
+                    <div className="relative z-10">
+                      <h4 className="text-2xl font-black mb-4">Day {day.day}: <span className={`${tc} text-lg`}>{day.title}</span></h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {day.morning && (
+                          <div className="bg-black/40 backdrop-blur-sm p-4 rounded-lg flex items-center justify-between border border-white/5">
+                            <div><span className="text-xs text-gray-400 block">Morning</span> <strong className="text-sm text-white">{day.morning}</strong></div>
+                          </div>
+                        )}
+                        {day.afternoon && (
+                          <div className="bg-black/40 backdrop-blur-sm p-4 rounded-lg flex items-center justify-between border border-white/5">
+                            <div><span className="text-xs text-gray-400 block">Afternoon</span> <strong className="text-sm text-white">{day.afternoon}</strong></div>
+                          </div>
+                        )}
+                        {day.evening && (
+                          <div className="bg-black/40 backdrop-blur-sm p-4 rounded-lg flex items-center justify-between border border-white/5">
+                            <div><span className="text-xs text-gray-400 block">Evening</span> <strong className="text-sm text-white">{day.evening}</strong></div>
+                          </div>
+                        )}
+                        {day.full_day && (
+                          <div className="bg-black/40 backdrop-blur-sm p-4 rounded-lg flex items-center justify-between col-span-1 md:col-span-2 border border-white/5">
+                            <div><span className="text-xs text-gray-400 block">Full Day</span> <strong className="text-sm text-white">{day.full_day}</strong></div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </motion.div>
                 );
               })}
               </div>
 
+              <FlightInsights source={source} destination={itinerary.destination} budget={itinerary.estimated_budget} />
+              
               {/* Auto Export Tools */}
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="flex justify-end gap-3 mt-6">
+                <button onClick={handleSaveTrip} className="flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-400 border border-emerald-500/30 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                  <Users size={16} /> Share & Save
+                </button>
                 <button onClick={handleExportPDF} className="flex items-center gap-2 bg-white/5 hover:bg-red-500/20 text-gray-300 hover:text-red-400 border border-white/10 hover:border-red-500/50 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
                   PDF Export
                 </button>
                 <button onClick={handleCheckout} disabled={isCheckingOut} className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 hover:scale-105 text-white px-6 py-2 rounded-lg text-sm font-black transition-transform shadow-[0_0_20px_rgba(168,85,247,0.4)] disabled:opacity-50">
                   {isCheckingOut ? <Loader2 size={16} className="animate-spin" /> : "Book This Trip"}
                 </button>
-                <button className="flex items-center gap-2 bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-400 border border-cyan-500/30 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                <button onClick={handleSyncCalendar} className="flex items-center gap-2 bg-cyan-500/20 hover:bg-cyan-500/40 text-cyan-400 border border-cyan-500/30 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
                   <Calendar size={16} /> Sync Calendar
                 </button>
               </motion.div>
+              {/* AI Chat to Tweak Itinerary */}
+              <div className="glass-panel p-6 border-indigo-500/30 mt-8">
+                <h4 className="text-xl font-bold mb-4 flex items-center gap-2"><Settings className="text-indigo-400" /> Tweak your Trip</h4>
+                <form onSubmit={handleChatSubmit} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={chatPrompt}
+                    onChange={(e) => setChatPrompt(e.target.value)}
+                    placeholder="e.g. Swap day 2 morning with a museum visit..."
+                    className="flex-1 bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-sm outline-none focus:border-indigo-500/50"
+                  />
+                  <button type="submit" disabled={isChatting} className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 px-6 rounded-lg font-bold transition-colors flex items-center justify-center min-w-[120px]">
+                    {isChatting ? <Loader2 size={18} className="animate-spin" /> : "Update"}
+                  </button>
+                </form>
+              </div>
             </motion.div>
           )}
         </div>
