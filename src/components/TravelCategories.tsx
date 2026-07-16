@@ -59,7 +59,7 @@ export default function TravelCategories() {
       
       if (Array.isArray(data) && data.length > 0) {
         setRecommendations(
-          data.slice(0, 6).map((d, i) => ({
+          data.map((d: any, i: number) => ({
             ...d,
             video: videoPool[i % videoPool.length],
           }))
@@ -124,11 +124,15 @@ export default function TravelCategories() {
               Top <span className="text-[#D4AF37] italic">{selectedCategory}</span> Destinations
             </h3>
 
-            <div className="flex overflow-x-auto gap-5 px-4 pb-12 w-full max-w-[100vw] no-scrollbar snap-x justify-start md:justify-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 pb-12 w-full max-w-7xl mx-auto">
               {loading ? (
-                Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
+                Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="w-full h-[340px] md:h-[400px] rounded-2xl bg-[#eaeaea] dark:bg-[#333333] animate-pulse">
+                    <div className="w-full h-full bg-gradient-to-b from-black/5 to-transparent dark:from-white/5" />
+                  </div>
+                ))
               ) : error ? (
-                <div className="w-full flex items-center justify-center text-[#888888] py-12">
+                <div className="col-span-full flex items-center justify-center text-[#888888] py-12">
                   <p>Could not load recommendations. Please try another category.</p>
                 </div>
               ) : (
@@ -137,10 +141,10 @@ export default function TravelCategories() {
                     key={place.id || idx}
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1, type: "spring", stiffness: 80 }}
+                    transition={{ delay: (idx % 10) * 0.1, type: "spring", stiffness: 80 }}
                     onHoverStart={() => setHoveredId(place.id)}
                     onHoverEnd={() => setHoveredId(null)}
-                    className="relative flex-shrink-0 w-[240px] h-[340px] md:w-[280px] md:h-[400px] rounded-2xl overflow-hidden cursor-pointer snap-center group"
+                    className="relative w-full h-[340px] md:h-[400px] rounded-2xl overflow-hidden cursor-pointer group"
                     style={{
                       transform: hoveredId === place.id ? "scale(1.05)" : hoveredId ? "scale(0.98)" : "scale(1)",
                       zIndex: hoveredId === place.id ? 50 : 10,

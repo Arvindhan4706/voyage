@@ -1,55 +1,52 @@
-import { Globe, Share2, MessageCircle, Sparkles } from "lucide-react";
+import { Globe, Share2, MessageCircle } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="w-full relative z-10 mt-32 border-t border-white/10 overflow-hidden bg-[#050816]">
+    <footer className="w-full relative z-10 mt-32 border-t border-[#eaeaea] dark:border-[#333333] overflow-hidden bg-[#faf9f6] dark:bg-[#18181b]">
       {/* Background Glow */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-4 pt-16 pb-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="md:col-span-2">
-            <div className="text-3xl font-black text-white mb-6 tracking-tighter">
-              Travel<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">AI</span>
+            <div className="text-3xl font-serif text-[#222222] dark:text-[#faf9f6] mb-6 tracking-widest uppercase">
+              VOYAGE
             </div>
-            <p className="text-gray-400 max-w-sm leading-relaxed mb-8">
-              The world's most advanced machine learning engine for personalized travel itineraries, dynamic pricing prediction, and immersive exploration.
+            <p className="text-[#888888] dark:text-[#a3a3a3] max-w-sm leading-relaxed mb-8">
+              Curating ultra-premium travel experiences, bespoke itineraries, and immersive luxury exploration for the discerning traveler.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-all"><Globe size={20} /></a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-all"><Share2 size={20} /></a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-all"><MessageCircle size={20} /></a>
+              <a href="#" className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-[#555555] dark:text-[#a3a3a3] hover:text-[#D4AF37] hover:border-[#D4AF37]/50 transition-all"><Globe size={20} /></a>
+              <a href="#" className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-[#555555] dark:text-[#a3a3a3] hover:text-[#D4AF37] hover:border-[#D4AF37]/50 transition-all"><Share2 size={20} /></a>
+              <a href="#" className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-[#555555] dark:text-[#a3a3a3] hover:text-[#D4AF37] hover:border-[#D4AF37]/50 transition-all"><MessageCircle size={20} /></a>
             </div>
           </div>
 
           <div>
-            <h4 className="text-white font-bold mb-6">Platform</h4>
+            <h4 className="text-[#222222] dark:text-[#faf9f6] font-bold mb-6 tracking-widest uppercase text-xs">Platform</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors text-sm">Destinations</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors text-sm">AI Itineraries</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors text-sm">Price Prediction</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors text-sm">Live Weather</a></li>
+              <li><a href="#" className="text-[#888888] dark:text-[#a3a3a3] hover:text-[#D4AF37] transition-colors text-sm">Destinations</a></li>
+              <li><a href="#" className="text-[#888888] dark:text-[#a3a3a3] hover:text-[#D4AF37] transition-colors text-sm">Curated Itineraries</a></li>
+              <li><a href="#" className="text-[#888888] dark:text-[#a3a3a3] hover:text-[#D4AF37] transition-colors text-sm">Bespoke Packages</a></li>
+              <li><a href="#" className="text-[#888888] dark:text-[#a3a3a3] hover:text-[#D4AF37] transition-colors text-sm">Travel Guides</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-white font-bold mb-6">Company</h4>
+            <h4 className="text-[#222222] dark:text-[#faf9f6] font-bold mb-6 tracking-widest uppercase text-xs">Company</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors text-sm">About Us</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors text-sm">Blog</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors text-sm">Contact</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors text-sm">Privacy Policy</a></li>
+              <li><a href="#" className="text-[#888888] dark:text-[#a3a3a3] hover:text-[#D4AF37] transition-colors text-sm">About Us</a></li>
+              <li><a href="#" className="text-[#888888] dark:text-[#a3a3a3] hover:text-[#D4AF37] transition-colors text-sm">Journal</a></li>
+              <li><a href="#" className="text-[#888888] dark:text-[#a3a3a3] hover:text-[#D4AF37] transition-colors text-sm">Contact</a></li>
+              <li><a href="#" className="text-[#888888] dark:text-[#a3a3a3] hover:text-[#D4AF37] transition-colors text-sm">Privacy Policy</a></li>
             </ul>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-white/10">
-          <p className="text-gray-500 text-sm mb-4 md:mb-0">
-            © 2026 TravelGPT Technologies. All rights reserved.
+        <div className="flex flex-col md:flex-row items-center justify-center pt-8 border-t border-[#eaeaea] dark:border-[#333333]">
+          <p className="text-[#888888] dark:text-[#a3a3a3] text-sm mb-4 md:mb-0">
+            © 2026 Voyage Luxury Travel. All rights reserved.
           </p>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            Powered by <Sparkles size={14} className="text-cyan-400" /> Advanced MLOps
-          </div>
         </div>
       </div>
     </footer>

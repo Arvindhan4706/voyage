@@ -69,7 +69,7 @@ export default function TrendingDestinations() {
         )}
       </div>
 
-      <div className="flex overflow-x-auto gap-5 px-4 pb-12 no-scrollbar pl-4 md:pl-16 snap-x">
+      <div className="flex overflow-x-auto gap-5 px-4 pb-12 custom-scrollbar pl-4 md:pl-16 snap-x">
         <AnimatePresence>
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)

@@ -30,22 +30,22 @@ export default function AISearch() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.4 }}
-        className="bg-[#faf9f6]/90 dark:bg-[#18181b]/90 backdrop-blur-md rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.08)] border border-[#eaeaea] dark:border-[#333333] p-2 mb-4"
+        className="glass-panel p-2 mb-6 group transition-all duration-500 hover:shadow-[0_0_40px_rgba(212,175,55,0.15)] focus-within:shadow-[0_0_40px_rgba(212,175,55,0.2)] focus-within:border-[#D4AF37]/50"
       >
         <form onSubmit={handleSearch} className="flex items-center w-full">
-          <div className="pl-6 pr-4 text-[#D4AF37]">
-            <Search size={20} strokeWidth={1.5} />
+          <div className="pl-6 pr-4 text-[#D4AF37] group-focus-within:animate-pulse">
+            <Search size={22} strokeWidth={1.5} />
           </div>
           <input 
             type="text" 
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("placeholder")} 
-            className="flex-1 bg-transparent border-none outline-none text-[#2a2a2a] dark:text-[#faf9f6] text-lg font-serif placeholder:text-[#888888] dark:text-[#a3a3a3] placeholder:font-sans placeholder:text-sm py-3"
+            className="flex-1 bg-transparent border-none outline-none text-[#2a2a2a] dark:text-[#faf9f6] text-xl font-serif placeholder:text-[#888888]/70 dark:placeholder:text-[#a3a3a3]/70 placeholder:font-serif placeholder:italic py-4 transition-all"
           />
           <button 
             type="submit"
-            className="bg-[#222222] dark:bg-[#faf9f6] dark:bg-[#18181b] hover:bg-[#D4AF37] dark:hover:bg-[#D4AF37] text-white dark:text-[#222222] dark:text-[#faf9f6] text-[10px] tracking-[0.2em] uppercase font-semibold px-10 py-4 rounded-full transition-all duration-500"
+            className="bg-[#222222] dark:bg-[#faf9f6] hover:bg-[#D4AF37] dark:hover:bg-[#D4AF37] text-white dark:text-[#222222] text-[11px] tracking-[0.2em] uppercase font-semibold px-10 py-4 rounded-full transition-all duration-500 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
           >{t("button")}</button>
         </form>
       </motion.div>

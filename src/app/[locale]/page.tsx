@@ -4,6 +4,7 @@ import TrendingDestinations from "@/components/TrendingDestinations";
 import TravelCategories from "@/components/TravelCategories";
 import HotelsModule from "@/components/HotelsModule";
 import FlightsModule from "@/components/FlightsModule";
+import PackagesModule from "@/components/PackagesModule";
 import Hero from "@/components/Hero";
 import AISearch from "@/components/AISearch";
 import AITripGenerator from "@/components/AITripGenerator";
@@ -43,6 +44,9 @@ export default function Home() {
 
         <div id="hotels" className="py-12" />
         <HotelsModule />
+        
+        <div id="packages" className="py-12" />
+        <PackagesModule />
         
         <div id="recommendations" className="py-12" />
         <RecommendationEngine />

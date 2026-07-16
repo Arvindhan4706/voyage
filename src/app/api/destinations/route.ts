@@ -1,13 +1,97 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Dynamic keywords to seed the live Wikipedia search
+const categoryMap: Record<string, string[]> = {
+  "Adventure": [
+    "Queenstown, New Zealand", "Patagonia", "Banff National Park", "Interlaken", "Chamonix",
+    "Moab, Utah", "Kathmandu", "Cusco", "Pokhara", "Lauterbrunnen",
+    "Torres del Paine", "Mount Kilimanjaro", "Zermatt", "Whistler, British Columbia", "Innsbruck",
+    "Reykjavík", "Rotorua", "Grindelwald", "Tromsø", "Cairns",
+    "Chalten", "Lake Louise, Alberta", "Jackson Hole", "Wanaka"
+  ],
+  "Luxury": [
+    "Monaco", "Dubai", "Bora Bora", "Saint Barthélemy", "Seychelles",
+    "Maldives", "Lake Como", "Amalfi", "St. Moritz", "Aspen, Colorado",
+    "Mykonos", "Capri", "Fiji", "Macau", "Beverly Hills",
+    "Saint-Tropez", "Courchevel", "Portofino", "Gstaad", "Abu Dhabi",
+    "Mustique", "Palm Beach, Florida", "Ibiza", "Cannes"
+  ],
+  "Beach": [
+    "Maldives", "Maui", "Fiji", "Cancun", "Phuket",
+    "Tulum", "Bora Bora", "Seychelles", "Palawan", "Whitsunday Islands",
+    "Punta Cana", "Bali", "Mykonos", "Turks and Caicos", "Koh Samui",
+    "Oahu", "Ibiza", "Boracay", "Zanzibar", "Miami Beach",
+    "Amalfi Coast", "Tenerife", "Mallorca", "Langkawi"
+  ],
+  "Nature": [
+    "Yellowstone National Park", "Yosemite National Park", "Amazon rainforest", "Galápagos Islands", "Serengeti",
+    "Banff National Park", "Grand Canyon", "Fiordland National Park", "Zion National Park", "Iguazu Falls",
+    "Mount Everest", "Plitvice Lakes National Park", "Svalbard", "Great Barrier Reef", "Costa Rica",
+    "Lake Bled", "Cliffs of Moher", "Mount Fuji", "Zhangjiajie", "Victoria Falls",
+    "Salar de Uyuni", "Milford Sound", "Rocky Mountain National Park", "Antelope Canyon"
+  ],
+  "Spiritual": [
+    "Varanasi", "Kyoto", "Lhasa", "Jerusalem", "Vatican City",
+    "Mecca", "Bodh Gaya", "Angkor Wat", "Mount Kailash", "Machu Picchu",
+    "Rishikesh", "Lumbini", "Amritsar", "Tirupati", "Sedona, Arizona",
+    "Lalibela", "Uluru", "Glastonbury", "Mount Sinai", "Wudang Mountains",
+    "Adam's Peak", "Fatima, Portugal", "Assisi", "Mount Athos"
+  ],
+  "Culinary": [
+    "Paris", "Tokyo", "Rome", "Lyon", "Bologna",
+    "Oaxaca", "Bangkok", "San Sebastián", "Lima", "New Orleans",
+    "Florence", "Naples", "Copenhagen", "Osaka", "Barcelona",
+    "Charleston, South Carolina", "Taipei", "Bordeaux", "Penang", "Hanoi",
+    "Marrakech", "Istanbul", "Mumbai", "Mexico City"
+  ],
+  "Photography": [
+    "Iceland", "Santorini", "Machu Picchu", "Antelope Canyon", "Petra",
+    "Venice", "Kyoto", "Salar de Uyuni", "Bagan", "Cinque Terre",
+    "Yosemite National Park", "Banff National Park", "Plitvice Lakes National Park", "Faroe Islands", "Cappadocia",
+    "Pamukkale", "Taj Mahal", "Havana", "Yellowstone National Park", "Angkor Wat",
+    "Mount Fuji", "Chefchaouen", "Dubrovnik", "Colmar"
+  ],
+  "Road Trips": [
+    "Route 66", "Great Ocean Road", "Amalfi Coast", "Ring Road (Iceland)", "Pacific Coast Highway",
+    "Garden Route", "Wild Atlantic Way", "Icefields Parkway", "Ruta 40", "Blue Ridge Parkway",
+    "Transfăgărășan", "NC500", "Overseas Highway", "Romantic Road", "Grossglockner High Alpine Road",
+    "Cabot Trail", "Milford Road, New Zealand", "Atlantic Ocean Road", "Salar de Uyuni", "Dalmatian Coast",
+    "Hana Highway", "Trollstigen", "Route des Grandes Alpes", "Stelvio Pass"
+  ],
+  "Wildlife": [
+    "Serengeti National Park", "Maasai Mara", "Kruger National Park", "Okavango Delta", "Pantanal",
+    "Galápagos Islands", "Bwindi Impenetrable National Park", "Ranthambore National Park", "Yellowstone National Park", "Antarctica",
+    "Corcovado National Park", "Churchill, Manitoba", "Etosha National Park", "Yala National Park", "Taman Negara",
+    "Ngorongoro Conservation Area", "Denali National Park", "Kangaroo Island", "Bandhavgarh National Park", "Jim Corbett National Park",
+    "Chobe National Park", "Kinabatangan River", "Torres del Paine", "South Georgia"
+  ],
+  "Solo Travel": [
+    "Reykjavík", "Copenhagen", "Amsterdam", "Singapore", "Chiang Mai",
+    "Kyoto", "Lisbon", "Berlin", "Melbourne", "Taipei",
+    "Stockholm", "Montreal", "Queenstown, New Zealand", "Vancouver", "Prague",
+    "Auckland", "Edinburgh", "Vienna", "Helsinki", "Zurich",
+    "Dublin", "Barcelona", "Munich", "Taipei"
+  ],
+  "Family": [
+    "Orlando, Florida", "Costa Rica", "London", "Hawaii", "San Diego",
+    "Tokyo", "Yellowstone National Park", "Gold Coast, Queensland", "Billund", "Paris",
+    "Rome", "Bali", "Oahu", "Phuket", "Fiji",
+    "Anaheim", "Cancun", "Sydney", "Singapore", "Copenhagen",
+    "Vienna", "Tenerife", "Maui", "Banff National Park"
+  ],
+  "Business": [
+    "London", "New York City", "Tokyo", "Singapore", "Hong Kong",
+    "Frankfurt", "Dubai", "Shanghai", "Paris", "San Francisco",
+    "Toronto", "Sydney", "Zurich", "Chicago", "Seoul",
+    "Beijing", "Boston", "Amsterdam", "Geneva", "Munich",
+    "Los Angeles", "Seattle", "Taipei", "Washington, D.C."
+  ]
+};
+
 const SEED_KEYWORDS = [
   "popular tourist destination island",
   "historic city tourism",
   "mountain resort town",
   "famous beach destination",
-  "cultural capital tourism",
-  "national park travel",
 ];
 
 async function fetchWithTimeout(resource: string, options: RequestInit = {}) {
@@ -26,7 +110,7 @@ async function fetchWithTimeout(resource: string, options: RequestInit = {}) {
 
 async function getDestinationData(query: string) {
   try {
-    const titleSlug = query.split(" ").slice(0, 3).join("_");
+    const titleSlug = query.split(" ").join("_");
     const sumRes = await fetchWithTimeout(
       `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(titleSlug)}`,
       { headers: { "User-Agent": "VoyageAI/1.0" } }
@@ -76,82 +160,51 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q");
 
-  // Fallback mock data in case of Wikipedia API failure
   const mockDestinations = [
     {
       id: "mock1",
       name: "Paris",
       country: "France",
-      extract: "Paris is the capital and most populous city of France, known for its cafe culture and landmarks like the Eiffel Tower.",
+      extract: "Paris is the capital and most populous city of France, known for its cafe culture and landmarks.",
       image: "https://images.unsplash.com/photo-1502602898657-3e90760b2131?w=800&q=80",
       weather: "15°C",
       weatherCode: 0,
       ratings: 4.8,
-    },
-    {
-      id: "mock2",
-      name: "Kyoto",
-      country: "Japan",
-      extract: "Kyoto is famous for its numerous classical Buddhist temples, as well as gardens, imperial palaces, Shinto shrines and traditional wooden houses.",
-      image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80",
-      weather: "22°C",
-      weatherCode: 2,
-      ratings: 4.9,
-    },
-    {
-      id: "mock3",
-      name: "Santorini",
-      country: "Greece",
-      extract: "Santorini is one of the Cyclades islands in the Aegean Sea, devastated by a volcanic eruption in the 16th century BC.",
-      image: "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=800&q=80",
-      weather: "28°C",
-      weatherCode: 1,
-      ratings: 4.7,
-    },
-    {
-      id: "mock4",
-      name: "Bali",
-      country: "Indonesia",
-      extract: "Bali is an Indonesian island known for its forested volcanic mountains, iconic rice paddies, beaches and coral reefs.",
-      image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=800&q=80",
-      weather: "30°C",
-      weatherCode: 3,
-      ratings: 4.6,
     }
   ];
 
   try {
-    const searchQuery = q ? (q + " tourist destination") : SEED_KEYWORDS[Math.floor(Math.random() * SEED_KEYWORDS.length)];
-    const randomOffset = q ? 0 : Math.floor(Math.random() * 20);
+    let destinations = [];
     
-    const searchRes = await fetchWithTimeout(
-      `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchQuery)}&format=json&srlimit=8&sroffset=${randomOffset}&origin=*`,
-      { cache: "no-store" }
-    );
-
-    if (!searchRes.ok) throw new Error("Wikipedia API failed");
-    
-    const text = await searchRes.text();
-    let searchData;
-    try {
-      searchData = JSON.parse(text);
-    } catch (e) {
-      throw new Error("Invalid JSON from Wikipedia");
+    if (q && categoryMap[q]) {
+      // We shuffle the array so it's not always the exact same subset
+      const places = categoryMap[q].sort(() => 0.5 - Math.random());
+      // Limit to 24
+      const selectedPlaces = places.slice(0, 24);
+      
+      destinations = (
+        await Promise.all(selectedPlaces.map(place => getDestinationData(place)))
+      ).filter(Boolean);
+    } else {
+      const searchQuery = q ? (q + " tourist destination") : SEED_KEYWORDS[Math.floor(Math.random() * SEED_KEYWORDS.length)];
+      const searchRes = await fetchWithTimeout(
+        `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchQuery)}&format=json&srlimit=24&origin=*`,
+        { cache: "no-store" }
+      );
+      if (!searchRes.ok) throw new Error("Wikipedia API failed");
+      const searchData = await searchRes.json();
+      const pages = searchData.query?.search || [];
+      destinations = (
+        await Promise.all(pages.map((p: any) => getDestinationData(p.title)))
+      ).filter(Boolean);
     }
-
-    const pages = searchData.query?.search || [];
-
-    const destinations = (
-      await Promise.all(pages.map((p: any) => getDestinationData(p.title)))
-    ).filter(Boolean);
 
     if (destinations.length === 0) {
       return NextResponse.json(mockDestinations);
     }
 
-    return NextResponse.json(destinations.slice(0, 6));
+    return NextResponse.json(destinations.slice(0, 24));
   } catch (error) {
-    // Silently fallback without polluting console
     return NextResponse.json(mockDestinations);
   }
 }

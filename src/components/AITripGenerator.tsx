@@ -171,9 +171,9 @@ export default function AITripGenerator() {
     <section className="py-24 max-w-7xl mx-auto px-4 relative z-10">
       <div className="text-center mb-16">
         <h2 className="text-4xl md:text-5xl font-black mb-4 flex items-center justify-center gap-3">
-          AI Trip <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Planner</span>
+          Curated Trip <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#D4AF37] to-amber-600">Planner</span>
         </h2>
-        <p className="text-gray-400 text-lg">Powered by NLP, Intent Classification, and LLM Integration.</p>
+        <p className="text-gray-400 text-lg">Bespoke itineraries crafted to your exact preferences.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -227,9 +227,9 @@ export default function AITripGenerator() {
             <button 
               onClick={handleGenerate}
               disabled={isGenerating}
-              className="w-full py-4 mt-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-black text-white shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex justify-center items-center gap-2"
+              className="w-full py-4 mt-4 bg-gradient-to-r from-[#D4AF37] to-amber-600 rounded-xl font-black text-[#111111] shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 flex justify-center items-center gap-2"
             >
-              {isGenerating ? <><Loader2 className="animate-spin" size={18} /> Running Rule Engine...</> : "Generate Itinerary"}
+              {isGenerating ? <><Loader2 className="animate-spin" size={18} /> Curating your journey...</> : "Generate Itinerary"}
             </button>
           </div>
         </div>
@@ -240,19 +240,19 @@ export default function AITripGenerator() {
             <div className="glass-panel p-12 h-full flex flex-col items-center justify-center text-center border-dashed border-2 border-white/10">
               <MapPin size={48} className="text-gray-600 mb-4" />
               <h3 className="text-xl font-bold text-gray-400">Ready to Explore?</h3>
-              <p className="text-gray-500 text-sm mt-2 max-w-md">Enter your travel details on the left and our NLP engine will generate a complete day-by-day itinerary instantly.</p>
+              <p className="text-gray-500 text-sm mt-2 max-w-md">Enter your travel details on the left and our curation engine will design a complete day-by-day itinerary instantly.</p>
             </div>
           )}
 
           {isGenerating && (
             <div className="glass-panel p-12 h-full flex flex-col items-center justify-center text-center border-cyan-500/30">
               <div className="relative w-24 h-24 mb-6">
-                <div className="absolute inset-0 border-t-4 border-cyan-400 rounded-full animate-spin"></div>
-                <div className="absolute inset-2 border-r-4 border-purple-400 rounded-full animate-spin direction-reverse"></div>
-                <div className="absolute inset-4 border-b-4 border-emerald-400 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 border-t-4 border-[#D4AF37] rounded-full animate-spin"></div>
+                <div className="absolute inset-2 border-r-4 border-amber-600 rounded-full animate-spin direction-reverse"></div>
+                <div className="absolute inset-4 border-b-4 border-white/20 rounded-full animate-spin"></div>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Analyzing Millions of Routes...</h3>
-              <p className="text-cyan-400 text-sm animate-pulse">Running Collaborative Filtering Models</p>
+              <h3 className="text-xl font-bold text-white mb-2">Curating the perfect journey...</h3>
+              <p className="text-[#D4AF37] text-sm animate-pulse">Selecting exclusive destinations and experiences</p>
             </div>
           )}
 
@@ -281,8 +281,8 @@ export default function AITripGenerator() {
                   <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{itinerary.destination}</span>
                 </div>
                 <div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase block">AI Rating (ML)</span>
-                  <span className="text-2xl font-black text-amber-500">★ {itinerary.predicted_rating || 4.5}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase block">Curation Rating</span>
+                  <span className="text-2xl font-black text-[#D4AF37]">★ {itinerary.predicted_rating || 4.5}</span>
                 </div>
                 <div className="text-right">
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase block">Estimated Budget</span>
@@ -376,9 +376,8 @@ export default function AITripGenerator() {
                   <Calendar size={16} /> Sync Calendar
                 </button>
               </motion.div>
-              {/* AI Chat to Tweak Itinerary */}
-              <div className="glass-panel p-6 border-indigo-500/30 mt-8">
-                <h4 className="text-xl font-bold mb-4 flex items-center gap-2"><Settings className="text-indigo-400" /> Tweak your Trip</h4>
+              <div className="glass-panel p-6 border-[#D4AF37]/30 mt-8">
+                <h4 className="text-xl font-bold mb-4 flex items-center gap-2"><Settings className="text-[#D4AF37]" /> Refine your Itinerary</h4>
                 <form onSubmit={handleChatSubmit} className="flex gap-2">
                   <input
                     type="text"

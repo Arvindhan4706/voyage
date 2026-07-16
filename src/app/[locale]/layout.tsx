@@ -27,7 +27,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} className={`${inter.variable} ${playfair.variable} antialiased`} suppressHydrationWarning>
-      <body className="font-sans bg-[#faf9f6] dark:bg-[#18181b] text-[#2a2a2a] dark:text-[#f3f4f6] overflow-x-hidden selection:bg-[#D4AF37]/30" suppressHydrationWarning>
+      <body className="font-sans bg-[#faf9f6] dark:bg-[#18181b] text-[#2a2a2a] dark:text-[#f3f4f6] overflow-x-hidden selection:bg-[#D4AF37]/30 bg-noise" suppressHydrationWarning>
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider defaultTheme="dark">
             <AuthProvider>

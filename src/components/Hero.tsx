@@ -1,37 +1,81 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useTranslations } from 'next-intl';
+import { useRef } from "react";
 
 export default function Hero() {
   const t = useTranslations('Hero');
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+  
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
+
   return (
-    <section className="relative w-full h-[85vh] min-h-[600px] flex items-center justify-center mt-0 pt-20">
-      {/* Background Image - Darker, Moodier */}
-      <div 
-        className="absolute inset-0 z-0 bg-cover bg-center"
-        style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1542314831-c6a4d142104d?q=80&w=2070&auto=format&fit=crop")' }}
+    <section ref={ref} className="relative w-full h-[85vh] min-h-[600px] flex items-center justify-center mt-0 pt-20 overflow-hidden">
+      {/* Background Video - Parallax & Gradient */}
+      <motion.div 
+        className="absolute inset-0 z-0 bg-black overflow-hidden"
+        style={{ y }}
       >
-        <div className="absolute inset-0 bg-black/50" />
-      </div>
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          className="absolute inset-0 w-full h-full object-cover opacity-80"
+          src="https://cdn.pixabay.com/video/2023/06/17/167610-836798030_large.mp4"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-[#faf9f6] dark:to-[#18181b] pointer-events-none" />
+      </motion.div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex flex-col items-center text-center">
         
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.2,
+                delayChildren: 0.1,
+              }
+            }
+          }}
           className="max-w-3xl"
         >
-          <p className="text-[10px] tracking-[0.3em] uppercase text-[#D4AF37] font-semibold mb-6">
+          <motion.p 
+            variants={{
+              hidden: { opacity: 0, y: 15 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+            }}
+            className="text-[10px] md:text-xs tracking-[0.3em] uppercase text-[#D4AF37] font-semibold mb-6"
+          >
             {t('subtitle')}
-          </p>
-          <h1 className="text-5xl md:text-7xl font-serif text-white mb-6 tracking-wide drop-shadow-md font-medium">
+          </motion.p>
+          <motion.h1 
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } }
+            }}
+            className="text-5xl md:text-7xl font-serif text-white mb-6 tracking-wide drop-shadow-lg font-medium"
+          >
             {t('title')}
-          </h1>
-          <p className="text-sm md:text-base text-white/80 mb-10 drop-shadow-md tracking-[0.1em] uppercase">
+          </motion.h1>
+          <motion.p 
+            variants={{
+              hidden: { opacity: 0, y: 15 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+            }}
+            className="text-sm md:text-base text-white/90 mb-10 drop-shadow-md tracking-[0.05em]"
+          >
             {t('description')}
-          </p>
+          </motion.p>
         </motion.div>
         
       </div>

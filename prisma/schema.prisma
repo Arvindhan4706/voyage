@@ -16,6 +16,8 @@ model User {
   email         String    @unique
   password      String?
   role          String    @default("USER") // SQLite doesn't support enums natively easily, falling back to String
+  loyaltyTier   String    @default("BRONZE") // BRONZE, SILVER, GOLD
+  voyageCoins   Int       @default(0)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -34,6 +36,7 @@ model Profile {
   travelStyle          String?
   favoriteDestinations String // Array not supported in SQLite, store as JSON string
   searchHistory        String // Array not supported in SQLite, store as JSON string
+  savedTravelers       String   @default("[]") // JSON Array string for frequent co-travelers
   
   user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
