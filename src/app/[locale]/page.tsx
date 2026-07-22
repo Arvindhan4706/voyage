@@ -10,6 +10,7 @@ import AISearch from "@/components/AISearch";
 import AITripGenerator from "@/components/AITripGenerator";
 import RecommendationEngine from "@/components/RecommendationEngine";
 import InsightsDashboard from "@/components/InsightsDashboard";
+import AIPipeline from "@/components/AIPipeline";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import TrustedMarquee from "@/components/TrustedMarquee";
 import Footer from "@/components/Footer";
@@ -53,6 +54,9 @@ export default function Home() {
         
         <div id="insights" className="py-12" />
         <InsightsDashboard />
+
+        <div id="pipeline" className="py-12" />
+        <AIPipeline />
         
         <div className="py-12" />
         <TrendingDestinations />
