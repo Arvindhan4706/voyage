@@ -5,75 +5,80 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get("q") || "Bali travel tourism";
 
   try {
-    // 1. Wikipedia Search for destination info
-    const wikiSearchRes = await fetch(
-      `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q + " travel tourism destination")}&format=json&srlimit=5&origin=*`
-    );
-    const wikiSearch = await wikiSearchRes.json();
-    const topPages = wikiSearch.query?.search || [];
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("Missing GEMINI_API_KEY");
 
-    // 2. Get summaries for top results
-    const summaries = await Promise.all(
-      topPages.slice(0, 4).map(async (page: any) => {
-        try {
-          const sumRes = await fetch(
-            `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(page.title)}`,
-            { headers: { "User-Agent": "VoyageAI/1.0" } }
-          );
-          const sum = await sumRes.json();
+    const prompt = `Act as an elite travel search engine. The user searched for: "${q}".
+Find up to 4 real-world travel destinations related to this query.
+For each destination, provide:
+1. "id": A unique random number.
+2. "name": The city or destination name.
+3. "extract": A short 150-character summary.
+4. "fullExtract": A comprehensive 3-paragraph travel guide/summary.
+5. "image": A valid Unsplash URL like "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80".
+6. "url": A simulated wikipedia URL (e.g. "https://en.wikipedia.org/wiki/Bali").
+7. "weather": An object with "temp" (e.g. "28°C"), "windspeed" (e.g. "12 km/h"), and "is_day" (boolean 0 or 1).
+8. "lat": Exact latitude.
+9. "lon": Exact longitude.
+10. "country": Country or region name.
 
-          // 3. Geocode the destination for coordinates
-          let weather = null;
-          let lat = sum.coordinates?.lat;
-          let lon = sum.coordinates?.lon;
+Return EXACTLY a JSON object with a "results" array containing these items.`;
 
-          if (!lat || !lon) {
-            const geoRes = await fetch(
-              `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(page.title)}&format=json&limit=1`,
-              { headers: { "User-Agent": "VoyageAI/1.0 contact@voyageai.com" } }
-            );
-            const geo = await geoRes.json();
-            if (geo.length > 0) {
-              lat = parseFloat(geo[0].lat);
-              lon = parseFloat(geo[0].lon);
-            }
+    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.7,
+          responseSchema: {
+            type: "OBJECT",
+            properties: {
+              results: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    id: { type: "NUMBER" },
+                    name: { type: "STRING" },
+                    extract: { type: "STRING" },
+                    fullExtract: { type: "STRING" },
+                    image: { type: "STRING" },
+                    url: { type: "STRING" },
+                    weather: {
+                      type: "OBJECT",
+                      properties: {
+                        temp: { type: "STRING" },
+                        windspeed: { type: "STRING" },
+                        is_day: { type: "NUMBER" }
+                      },
+                      required: ["temp", "windspeed", "is_day"]
+                    },
+                    lat: { type: "NUMBER" },
+                    lon: { type: "NUMBER" },
+                    country: { type: "STRING" }
+                  },
+                  required: ["id", "name", "extract", "fullExtract", "image", "url", "weather", "lat", "lon", "country"]
+                }
+              }
+            },
+            required: ["results"]
           }
-
-          // 4. Get live weather from Open-Meteo
-          if (lat && lon) {
-            const weatherRes = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=relative_humidity_2m&forecast_days=1`
-            );
-            const weatherData = await weatherRes.json();
-            if (weatherData.current_weather) {
-              weather = {
-                temp: `${Math.round(weatherData.current_weather.temperature)}°C`,
-                windspeed: `${weatherData.current_weather.windspeed} km/h`,
-                is_day: weatherData.current_weather.is_day,
-              };
-            }
-          }
-
-          return {
-            id: page.pageid,
-            name: sum.title,
-            extract: sum.extract?.slice(0, 200) + "...",
-            fullExtract: sum.extract,
-            image: sum.thumbnail?.source || null,
-            url: sum.content_urls?.desktop?.page,
-            weather,
-            lat,
-            lon,
-            country: sum.description || "",
-          };
-        } catch {
-          return null;
         }
       })
-    );
+    });
 
-    const results = summaries.filter(Boolean);
-    return NextResponse.json({ results, query: q });
+    if (!geminiRes.ok) {
+      const err = await geminiRes.text();
+      throw new Error(`Gemini API failed: ${err}`);
+    }
+
+    const data = await geminiRes.json();
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '{"results": []}';
+    const parsed = JSON.parse(content.replace(/^```json/i, "").replace(/```$/, "").trim());
+
+    return NextResponse.json({ results: parsed.results || [], query: q });
   } catch (error) {
     console.error("Search Error:", error);
     return NextResponse.json({ results: [], query: q, error: "Search failed" }, { status: 500 });

@@ -29,7 +29,7 @@ export default function Hero() {
           className="absolute inset-0 w-full h-full object-cover opacity-80"
           src="https://cdn.pixabay.com/video/2023/06/17/167610-836798030_large.mp4"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-[#faf9f6] dark:to-[#18181b] pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-white dark:to-black pointer-events-none" />
       </motion.div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10 flex flex-col items-center text-center">

@@ -19,24 +19,24 @@ export default function PriceAlerts() {
 
   return (
     <div className="glass-panel p-8 rounded-3xl border border-[#eaeaea] dark:border-[#333333] shadow-xl bg-white/50 dark:bg-white/5 backdrop-blur-md">
-      <h3 className="text-xl font-bold flex items-center gap-2 mb-6 text-[#222222] dark:text-[#faf9f6]">
+      <h3 className="text-xl font-bold flex items-center gap-2 mb-6 text-black dark:text-white">
         <Bell className="text-purple-500" size={24} /> 
         Active Price Alerts
       </h3>
       
       <div className="space-y-4">
         {alerts.map(alert => (
-          <div key={alert.id} className={`p-4 rounded-2xl border ${alert.active ? 'border-purple-500/30 bg-purple-500/5' : 'border-[#eaeaea] dark:border-[#333333] bg-[#faf9f6] dark:bg-[#18181b] opacity-60'} flex flex-col md:flex-row justify-between items-center transition-all`}>
+          <div key={alert.id} className={`p-4 rounded-2xl border ${alert.active ? 'border-purple-500/30 bg-purple-500/5' : 'border-[#eaeaea] dark:border-[#333333] bg-white dark:bg-black opacity-60'} flex flex-col md:flex-row justify-between items-center transition-all`}>
             
             <div className="flex-1 mb-4 md:mb-0">
-              <h4 className="font-bold text-[#222222] dark:text-[#faf9f6] text-lg">{alert.route}</h4>
+              <h4 className="font-bold text-black dark:text-white text-lg">{alert.route}</h4>
               <p className="text-xs text-[#888888] dark:text-[#a3a3a3] uppercase tracking-wider">{alert.date}</p>
             </div>
             
             <div className="flex items-center gap-8 w-full md:w-auto">
               <div>
                 <p className="text-[10px] text-[#888888] uppercase tracking-wider block mb-1">Target</p>
-                <p className="font-bold text-[#222222] dark:text-[#faf9f6]">₹{alert.targetPrice.toLocaleString()}</p>
+                <p className="font-bold text-black dark:text-white">₹{alert.targetPrice.toLocaleString()}</p>
               </div>
               
               <div>

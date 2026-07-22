@@ -252,12 +252,27 @@ export default function AITripGenerator() {
                 <div className="absolute inset-4 border-b-4 border-white/20 rounded-full animate-spin"></div>
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Curating the perfect journey...</h3>
-              <p className="text-[#D4AF37] text-sm animate-pulse">Selecting exclusive destinations and experiences</p>
+              <p className="text-[#D4AF37] text-sm animate-pulse mb-6">Selecting exclusive destinations and experiences</p>
+              <button 
+                onClick={() => { setIsGenerating(false); setItinerary(null); }}
+                className="px-6 py-2 border border-white/20 hover:border-red-500/50 hover:bg-red-500/10 text-white rounded-lg text-sm font-bold transition-colors"
+              >
+                Cancel Generation
+              </button>
             </div>
           )}
 
           {itinerary && !isGenerating && (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
+              
+              <div className="flex justify-end">
+                <button 
+                  onClick={() => setItinerary(null)}
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-lg text-sm font-bold transition-colors"
+                >
+                  &larr; Start Over
+                </button>
+              </div>
               
               {/* Interactive 2D Map Visualization */}
               {itinerary.coordinates && (
@@ -290,7 +305,7 @@ export default function AITripGenerator() {
                 </div>
               </div>
 
-              {/* Real-time weather + Wikipedia info */}
+              {/* Real-time AI generated weather and info */}
               {(itinerary.current_weather || itinerary.about) && (
                 <div className="glass-panel p-4 border border-cyan-500/20 grid grid-cols-1 md:grid-cols-2 gap-4">
                   {itinerary.current_weather && (
@@ -313,7 +328,7 @@ export default function AITripGenerator() {
                   )}
                   {itinerary.about && (
                     <div className="col-span-1 md:col-span-2 bg-white/5 rounded-lg p-3">
-                      <span className="text-xs text-gray-500 font-bold uppercase block mb-1">About (Wikipedia)</span>
+                      <span className="text-xs text-gray-500 font-bold uppercase block mb-1">About (AI Generated)</span>
                       <p className="text-sm text-gray-300">{itinerary.about}</p>
                     </div>
                   )}

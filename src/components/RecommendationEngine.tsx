@@ -277,7 +277,7 @@ export default function RecommendationEngine() {
                             </div>
                             <div className="bg-white/5 border border-white/5 rounded-xl p-3 shadow-inner">
                               <div className="text-[10px] text-gray-400 uppercase mb-1 flex items-center gap-1"><CloudSun size={12} className="text-yellow-400"/> Weather</div>
-                              <div className="font-bold text-white text-base">{res.weather || "N/A"}</div>
+                              <div className="font-bold text-white text-base">{res.temp ? `${res.temp}°C` : "N/A"}</div>
                             </div>
                             <div className="bg-white/5 border border-white/5 rounded-xl p-3 shadow-inner">
                               <div className="text-[10px] text-gray-400 uppercase mb-1 flex items-center gap-1"><Plane size={12} className="text-green-400"/> Flights</div>
@@ -289,15 +289,10 @@ export default function RecommendationEngine() {
                             </div>
                           </div>
 
-                          {/* Wikipedia Description */}
+                          {/* AI Generated Description */}
                           <div className="mb-6 flex-1">
                             <h4 className="text-white font-bold mb-2 flex items-center gap-2">AI Summary <CheckCircle2 size={14} className="text-cyan-400"/></h4>
-                            <p className="text-gray-400 text-sm leading-relaxed">{res.extract}</p>
-                            {res.wikiUrl && (
-                              <a href={res.wikiUrl} target="_blank" rel="noopener noreferrer" className="inline-flex mt-3 text-cyan-400 text-xs font-bold hover:text-cyan-300 items-center gap-1 transition-colors">
-                                Read full article on Wikipedia <ChevronRight size={12} />
-                              </a>
-                            )}
+                            <p className="text-gray-400 text-sm leading-relaxed">{res.summary || res.extract}</p>
                           </div>
 
                           {/* Action Buttons */}

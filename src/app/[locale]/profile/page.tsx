@@ -19,7 +19,7 @@ export default function ProfilePage() {
   ]);
 
   return (
-    <div className="min-h-screen pt-32 pb-20 px-6 sm:px-8 lg:px-12 bg-[#faf9f6] dark:bg-[#09090b] relative overflow-hidden font-outfit">
+    <div className="min-h-screen pt-32 pb-20 px-6 sm:px-8 lg:px-12 bg-white dark:bg-black relative overflow-hidden font-outfit">
       
       {/* Background Orbs */}
       <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-yellow-500/10 rounded-full blur-[120px] pointer-events-none" />
@@ -32,7 +32,7 @@ export default function ProfilePage() {
           transition={{ duration: 0.8 }}
           className="mb-12"
         >
-          <h1 className="text-4xl md:text-5xl font-serif tracking-tight mb-4 text-[#222222] dark:text-[#faf9f6]">My Profile</h1>
+          <h1 className="text-4xl md:text-5xl font-serif tracking-tight mb-4 text-black dark:text-white">My Profile</h1>
           <p className="text-[#888888] dark:text-[#a3a3a3] text-lg">Manage your luxury travel preferences, rewards, and saved travelers.</p>
         </motion.div>
 
@@ -47,13 +47,13 @@ export default function ProfilePage() {
           >
             {/* User Card */}
             <div className="glass-panel p-8 rounded-3xl text-center border border-[#eaeaea] dark:border-[#333333] shadow-xl relative overflow-hidden bg-white/50 dark:bg-white/5 backdrop-blur-md">
-              <div className="w-32 h-32 mx-auto bg-[#faf9f6] dark:bg-[#18181b] rounded-full flex items-center justify-center mb-6 border-2 border-yellow-500/30 shadow-inner relative">
+              <div className="w-32 h-32 mx-auto bg-white dark:bg-black rounded-full flex items-center justify-center mb-6 border-2 border-yellow-500/30 shadow-inner relative">
                 <User size={48} className="text-[#888888] dark:text-[#a3a3a3]" />
-                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-gray-300 to-gray-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border-2 border-white dark:border-[#09090b]">
+                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-gray-300 to-gray-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg border-2 border-white dark:border-black">
                   {loyaltyTier}
                 </div>
               </div>
-              <h2 className="text-2xl font-bold tracking-tight mb-1 text-[#222222] dark:text-[#faf9f6]">{session?.user?.name || "Distinguished Guest"}</h2>
+              <h2 className="text-2xl font-bold tracking-tight mb-1 text-black dark:text-white">{session?.user?.name || "Distinguished Guest"}</h2>
               <p className="text-sm text-[#888888] dark:text-[#a3a3a3] mb-6">{session?.user?.email || "guest@voyage.ai"}</p>
               
               <button className="w-full py-3 bg-[#eaeaea] dark:bg-[#333333] hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black rounded-xl text-sm font-semibold transition-all duration-300">
@@ -70,7 +70,7 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-sm text-[#888888] dark:text-[#a3a3a3] uppercase tracking-wider font-bold mb-1">VoyageCoins Balance</p>
-                  <p className="text-3xl font-black text-[#222222] dark:text-[#faf9f6] flex items-center gap-2">
+                  <p className="text-3xl font-black text-black dark:text-white flex items-center gap-2">
                     <Coins className="text-yellow-500" /> {voyageCoins.toLocaleString()}
                   </p>
                 </div>
@@ -93,7 +93,7 @@ export default function ProfilePage() {
             {/* Saved Travelers */}
             <div className="glass-panel p-8 rounded-3xl border border-[#eaeaea] dark:border-[#333333] shadow-xl bg-white/50 dark:bg-white/5 backdrop-blur-md">
                <div className="flex justify-between items-center mb-6">
-                 <h3 className="text-xl font-bold flex items-center gap-2 text-[#222222] dark:text-[#faf9f6]">
+                 <h3 className="text-xl font-bold flex items-center gap-2 text-black dark:text-white">
                    <Users className="text-blue-500" size={24} /> 
                    Saved Travelers
                  </h3>
@@ -104,9 +104,9 @@ export default function ProfilePage() {
                
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  {savedTravelers.map((traveler) => (
-                   <div key={traveler.id} className="p-4 rounded-2xl border border-[#eaeaea] dark:border-[#333333] bg-[#faf9f6] dark:bg-[#18181b] flex justify-between items-center group">
+                   <div key={traveler.id} className="p-4 rounded-2xl border border-[#eaeaea] dark:border-[#333333] bg-white dark:bg-black flex justify-between items-center group">
                      <div>
-                       <h4 className="font-bold text-[#222222] dark:text-[#faf9f6] text-lg">{traveler.name}</h4>
+                       <h4 className="font-bold text-black dark:text-white text-lg">{traveler.name}</h4>
                        <p className="text-xs text-[#888888] dark:text-[#a3a3a3] uppercase tracking-wider">{traveler.relation} • {traveler.dob}</p>
                      </div>
                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -126,7 +126,7 @@ export default function ProfilePage() {
 
             {/* Travel DNA */}
             <div className="glass-panel p-8 rounded-3xl border border-[#eaeaea] dark:border-[#333333] shadow-xl bg-white/50 dark:bg-white/5 backdrop-blur-md">
-              <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-[#222222] dark:text-[#faf9f6]">
+              <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-black dark:text-white">
                 <Compass className="text-green-500" size={24} /> 
                 Travel DNA
               </h3>
@@ -138,12 +138,12 @@ export default function ProfilePage() {
                   { icon: <Shield size={20}/>, title: "Dietary Requirements", value: "None" },
                   { icon: <Camera size={20}/>, title: "Interests", value: "Photography, Fine Dining" },
                 ].map((item, idx) => (
-                  <div key={idx} className="bg-[#faf9f6] dark:bg-[#18181b] p-4 rounded-2xl border border-[#eaeaea] dark:border-[#333333]">
+                  <div key={idx} className="bg-white dark:bg-black p-4 rounded-2xl border border-[#eaeaea] dark:border-[#333333]">
                     <div className="flex items-center gap-3 text-[#888888] dark:text-[#a3a3a3] mb-2">
                       {item.icon}
                       <span className="text-xs uppercase tracking-wider font-semibold">{item.title}</span>
                     </div>
-                    <p className="font-medium text-[#222222] dark:text-[#faf9f6]">{item.value}</p>
+                    <p className="font-medium text-black dark:text-white">{item.value}</p>
                   </div>
                 ))}
               </div>

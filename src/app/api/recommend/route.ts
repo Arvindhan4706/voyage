@@ -1,77 +1,60 @@
 import { NextResponse } from "next/server";
 
-// Geocode and weather fetcher
-async function getLiveDetails(placeTitle: string) {
-  try {
-    const sumRes = await fetch(
-      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(placeTitle)}`,
-      { headers: { "User-Agent": "VoyageAI/1.0" } }
-    );
-    const sum = await sumRes.json();
-    if (!sum.title) return null;
-
-    let lat = sum.coordinates?.lat;
-    let lon = sum.coordinates?.lon;
-
-    if (!lat || !lon) {
-      const geoRes = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(sum.title)}&format=json&limit=1`,
-        { headers: { "User-Agent": "VoyageAI/1.0" } }
-      );
-      const geo = await geoRes.json();
-      if (geo.length > 0) {
-        lat = parseFloat(geo[0].lat);
-        lon = parseFloat(geo[0].lon);
-      }
-    }
-
-    return {
-      destination: sum.title,
-      image: sum.thumbnail?.source?.replace(/\/\d+px-/, "/800px-") || "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80",
-      description: sum.extract?.slice(0, 100) + "...",
-      lat,
-      lon,
-    };
-  } catch {
-    return null;
-  }
-}
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { history_tags = ["Travel", "Tourism"] } = body;
 
-    // 1. Convert user's unique history into a dynamic Wikipedia search query
-    // Enforce that it's an actual location by adding terms like city, island, or region
-    const keywords = history_tags.slice(0, 3).join(" ");
-    const searchQuery = `${keywords} (city OR island OR resort) tourism`;
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("Missing GEMINI_API_KEY");
 
-    // 2. Fetch live matching places from Wikipedia
-    const searchRes = await fetch(
-      `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchQuery)}&format=json&srlimit=10&origin=*`,
-      { cache: "no-store" }
-    );
-    const searchData = await searchRes.json();
-    const pages = searchData.query?.search || [];
+    const prompt = `Act as an elite AI travel recommendation engine. 
+Based on these user interest tags: [${history_tags.join(", ")}], generate exactly 4 highly personalized travel destination recommendations.
+For each recommendation, provide:
+1. "id": A unique random string.
+2. "destination": The name of the location.
+3. "matchScore": A number between 85 and 99.
+4. "cost": A string representing the estimated trip cost in INR (e.g. "₹45,000").
+5. "tags": An array of exactly 3 short interest tags matching the location.
+6. "image": A valid Unsplash URL like "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80".
 
-    // Shuffle results so we don't always give the exact same top 4
-    const shuffledPages = pages.sort(() => 0.5 - Math.random()).slice(0, 4);
+Return exactly a JSON array of these objects.`;
 
-    // 3. Get rich data for these places
-    const recommendations = (
-      await Promise.all(shuffledPages.map((p: any) => getLiveDetails(p.title)))
-    ).filter(Boolean);
+    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.9,
+          responseSchema: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: {
+                id: { type: "STRING" },
+                destination: { type: "STRING" },
+                matchScore: { type: "NUMBER" },
+                cost: { type: "STRING" },
+                tags: { type: "ARRAY", items: { type: "STRING" } },
+                image: { type: "STRING" }
+              },
+              required: ["id", "destination", "matchScore", "cost", "tags", "image"]
+            }
+          }
+        }
+      })
+    });
 
-    // 4. Format them with dynamic scores
-    const finalRecs = recommendations.map((rec: any, idx: number) => ({
-      id: Math.random().toString(),
-      destination: rec.destination,
-      matchScore: Math.floor(88 + Math.random() * 10), // dynamically generated score
-      cost: `₹${Math.round(15000 + Math.random() * 50000).toLocaleString()}`,
-      tags: history_tags.slice(0, 2).concat(["Live Result"]),
-      image: rec.image,
-    }));
+    if (!geminiRes.ok) {
+      const err = await geminiRes.text();
+      throw new Error(`Gemini API failed: ${err}`);
+    }
+
+    const data = await geminiRes.json();
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+    const finalRecs = JSON.parse(content.replace(/^```json/i, "").replace(/```$/, "").trim());
 
     return NextResponse.json(finalRecs);
   } catch (error) {

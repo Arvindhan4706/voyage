@@ -45,7 +45,7 @@ export default function Header() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${scrolled ? 'py-4 bg-[#faf9f6]/90 dark:bg-[#18181b]/90 backdrop-blur-xl border-b border-[#eaeaea] dark:border-[#333333]' : 'py-8 bg-transparent'}`}
+        className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${scrolled ? 'py-4 bg-white/90 dark:bg-black/90 backdrop-blur-xl border-b border-[#eaeaea] dark:border-[#1f1f1f]' : 'py-8 bg-transparent'}`}
       >
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex items-center justify-between">
           
@@ -60,7 +60,7 @@ export default function Header() {
                 key={link.name} 
                 href={link.id}
                 onClick={(e) => handleSmoothScroll(e, link.id)}
-                className={`text-[10px] tracking-[0.2em] font-semibold hover:text-[#D4AF37] transition-colors ${scrolled ? 'text-[#2a2a2a] dark:text-[#faf9f6]' : 'text-white/90'}`}
+                className={`text-[10px] tracking-[0.2em] font-semibold hover:text-[#D4AF37] transition-colors ${scrolled ? 'text-[#2a2a2a] dark:text-white' : 'text-white/90'}`}
               >
                 {link.name}
               </a>
@@ -68,7 +68,7 @@ export default function Header() {
           </nav>
 
           {/* Logo (Center) */}
-          <div className={`text-3xl tracking-widest font-serif text-center flex-1 cursor-pointer transition-colors duration-500 ${scrolled ? 'text-[#222222] dark:text-[#faf9f6]' : 'text-white'}`}>
+          <div className={`text-3xl tracking-widest font-serif text-center flex-1 cursor-pointer transition-colors duration-500 ${scrolled ? 'text-black dark:text-white' : 'text-white'}`}>
             VOYAGE
           </div>
 
@@ -86,7 +86,7 @@ export default function Header() {
               </button>
               
               {langOpen && (
-                <div className="absolute top-full right-0 mt-2 bg-[#faf9f6] dark:bg-[#18181b] border border-[#eaeaea] dark:border-[#333333] rounded-md shadow-xl overflow-y-auto max-h-64 scrollbar-thin py-1 z-50">
+                <div className="absolute top-full right-0 mt-2 glass-dropdown rounded-md overflow-y-auto max-h-64 scrollbar-thin py-1 z-50">
                   {["en","es","fr","de","hi","zh","ja","pt","ru","ar","it","ko","nl","tr","pl","sv","da","fi","no","el","cs","hu","ro","th","vi","id","ms","bn","ta","te","ur"].map((lang) => (
                     <button
                       key={lang}
@@ -115,8 +115,8 @@ export default function Header() {
                   </button>
 
                   {userMenuOpen && (
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-[#faf9f6] dark:bg-[#18181b] border border-[#eaeaea] dark:border-[#333333] rounded-md shadow-xl overflow-hidden py-1 z-50">
-                      <div className="px-4 py-2 border-b border-[#eaeaea] dark:border-[#333333]">
+                    <div className="absolute top-full right-0 mt-2 w-48 glass-dropdown rounded-md overflow-hidden py-1 z-50">
+                      <div className="px-4 py-2 border-b border-[#eaeaea] dark:border-[#1f1f1f]">
                         <p className="text-xs font-semibold text-[#2a2a2a] dark:text-[#f3f4f6] truncate">
                           {session.user?.name || session.user?.email || "User"}
                         </p>
@@ -138,7 +138,7 @@ export default function Header() {
                       </Link>
                       <button
                         onClick={() => { signOut(); setUserMenuOpen(false); }}
-                        className="flex w-full items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-red-500 hover:bg-red-500 hover:text-white transition-colors border-t border-[#eaeaea] dark:border-[#333333]"
+                        className="flex w-full items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-red-500 hover:bg-red-500 hover:text-white transition-colors border-t border-[#eaeaea] dark:border-[#1f1f1f]"
                       >
                         <LogOut size={14} /> Sign Out
                       </button>
@@ -148,7 +148,7 @@ export default function Header() {
               ) : (
                 <Link
                   href="/login"
-                  className={`text-[10px] tracking-[0.1em] uppercase font-semibold border px-4 py-2 rounded-full transition-all duration-300 hover:bg-[#D4AF37] hover:text-white hover:border-[#D4AF37] ${scrolled ? 'border-[#2a2a2a]/20 text-[#2a2a2a] dark:border-white/20 dark:text-gray-100' : 'border-white/30 text-white/90'}`}
+                  className="glass-button text-[10px] tracking-[0.1em] uppercase font-semibold px-4 py-2 rounded-full text-white/90 dark:text-gray-100"
                 >
                   Log In
                 </Link>

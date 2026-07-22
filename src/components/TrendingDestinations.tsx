@@ -55,7 +55,7 @@ export default function TrendingDestinations() {
             </span>
           </h2>
           <p className="text-gray-400 flex items-center gap-2">
-            <Globe size={14} className="text-cyan-400" /> Real destinations from Wikipedia · Live weather from Open-Meteo
+            <Globe size={14} className="text-cyan-400" /> AI Curated Destinations · Gemini Forecasts
           </p>
         </div>
         {!loading && !error && (
@@ -136,7 +136,7 @@ export default function TrendingDestinations() {
                   <div className="grid grid-cols-3 gap-2 mb-2">
                     <div className="flex flex-col items-center bg-white/10 backdrop-blur-md rounded-lg p-2">
                       <Thermometer size={14} className="text-orange-400 mb-1" />
-                      <span className="text-xs font-bold">{place.weather || "N/A"}</span>
+                      <span className="text-xs font-bold">{place.temp ? `${place.temp}°C` : "N/A"}</span>
                     </div>
                     <div className="flex flex-col items-center bg-white/10 backdrop-blur-md rounded-lg p-2">
                       <Star size={14} className="text-yellow-400 mb-1" />
@@ -159,18 +159,7 @@ export default function TrendingDestinations() {
                     className="overflow-hidden"
                   >
                     <div className="pt-3 border-t border-white/20 mt-1">
-                      <p className="text-xs text-gray-300 mb-3 line-clamp-3">{place.extract}</p>
-                      {place.wikiUrl && (
-                        <a
-                          href={place.wikiUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-xs text-cyan-400 hover:text-cyan-300 font-bold transition-colors"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Play size={10} className="fill-cyan-400" /> Read more on Wikipedia
-                        </a>
-                      )}
+                      <p className="text-xs text-gray-300 mb-3 line-clamp-3">{place.summary || place.extract}</p>
                     </div>
                   </motion.div>
                 </div>

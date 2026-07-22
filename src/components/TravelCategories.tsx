@@ -78,7 +78,7 @@ export default function TravelCategories() {
     <section className="py-24 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 relative z-10 border-t border-[#eaeaea] dark:border-[#333333]">
       <div className="text-center mb-16">
         <p className="text-[10px] tracking-[0.2em] uppercase text-[#888888] dark:text-[#a3a3a3] font-medium mb-3">{t("subtitle")}</p>
-        <h2 className="text-4xl md:text-5xl font-serif text-[#222222] dark:text-[#faf9f6] mb-4">{t("title")}</h2>
+        <h2 className="text-4xl md:text-5xl font-serif text-black dark:text-white mb-4">{t("title")}</h2>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12 mb-16">
@@ -97,12 +97,12 @@ export default function TravelCategories() {
               className="flex flex-col items-center justify-center gap-4 group cursor-pointer"
             >
               <div className={`w-16 h-16 rounded-full border flex items-center justify-center transition-all duration-500 
-                ${isSelected ? 'border-[#D4AF37] bg-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.4)]' : 'bg-[#faf9f6] dark:bg-[#18181b] border-[#eaeaea] dark:border-[#333333] group-hover:border-[#D4AF37] group-hover:bg-[#D4AF37]/5'}
+                ${isSelected ? 'border-[#D4AF37] bg-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.4)]' : 'bg-white dark:bg-black border-[#eaeaea] dark:border-[#333333] group-hover:border-[#D4AF37] group-hover:bg-[#D4AF37]/5'}
               `}>
-                <Icon size={22} className={`transition-colors duration-500 ${isSelected ? 'text-white dark:text-[#222222]' : 'text-[#222222] dark:text-[#faf9f6] group-hover:text-[#D4AF37]'}`} strokeWidth={1} />
+                <Icon size={22} className={`transition-colors duration-500 ${isSelected ? 'text-white dark:text-black' : 'text-black dark:text-white group-hover:text-[#D4AF37]'}`} strokeWidth={1} />
               </div>
               <span className={`text-[11px] tracking-widest uppercase font-medium text-center transition-colors duration-500
-                ${isSelected ? 'text-[#D4AF37]' : 'text-[#888888] dark:text-[#a3a3a3] group-hover:text-[#222222] dark:group-hover:text-[#faf9f6]'}
+                ${isSelected ? 'text-[#D4AF37]' : 'text-[#888888] dark:text-[#a3a3a3] group-hover:text-black dark:group-hover:text-white'}
               `}>{cat.name}</span>
             </motion.div>
           );
@@ -185,7 +185,7 @@ export default function TravelCategories() {
                       <div className="grid grid-cols-2 gap-2 mb-2">
                         <div className="flex items-center justify-center gap-1 bg-white/10 backdrop-blur-md rounded-lg p-1.5">
                           <Thermometer size={12} className="text-orange-400" />
-                          <span className="text-[10px] font-bold text-white">{place.weather || "N/A"}</span>
+                          <span className="text-[10px] font-bold text-white">{place.temp ? `${place.temp}°C` : "N/A"}</span>
                         </div>
                         <div className="flex items-center justify-center gap-1 bg-white/10 backdrop-blur-md rounded-lg p-1.5">
                           <Star size={12} className="text-yellow-400" />
@@ -200,18 +200,7 @@ export default function TravelCategories() {
                         className="overflow-hidden"
                       >
                         <div className="pt-2 border-t border-white/20 mt-2">
-                          <p className="text-[10px] text-gray-300 mb-2 line-clamp-3">{place.extract}</p>
-                          {place.wikiUrl && (
-                            <a
-                              href={place.wikiUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-[10px] text-[#D4AF37] hover:text-white font-bold transition-colors"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Play size={8} className="fill-[#D4AF37]" /> Read more
-                            </a>
-                          )}
+                          <p className="text-[10px] text-gray-300 mb-2 line-clamp-3">{place.summary || place.extract}</p>
                         </div>
                       </motion.div>
                     </div>

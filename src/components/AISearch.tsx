@@ -41,11 +41,11 @@ export default function AISearch() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("placeholder")} 
-            className="flex-1 bg-transparent border-none outline-none text-[#2a2a2a] dark:text-[#faf9f6] text-xl font-serif placeholder:text-[#888888]/70 dark:placeholder:text-[#a3a3a3]/70 placeholder:font-serif placeholder:italic py-4 transition-all"
+            className="flex-1 bg-transparent border-none outline-none text-[#2a2a2a] dark:text-white text-xl font-serif placeholder:text-[#888888]/70 dark:placeholder:text-[#a3a3a3]/70 placeholder:font-serif placeholder:italic py-4 transition-all"
           />
           <button 
             type="submit"
-            className="bg-[#222222] dark:bg-[#faf9f6] hover:bg-[#D4AF37] dark:hover:bg-[#D4AF37] text-white dark:text-[#222222] text-[11px] tracking-[0.2em] uppercase font-semibold px-10 py-4 rounded-full transition-all duration-500 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
+            className="bg-black dark:bg-white hover:bg-[#D4AF37] dark:hover:bg-[#D4AF37] text-white dark:text-black text-[11px] tracking-[0.2em] uppercase font-semibold px-10 py-4 rounded-full transition-all duration-500 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
           >{t("button")}</button>
         </form>
       </motion.div>

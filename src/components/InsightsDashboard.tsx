@@ -68,7 +68,7 @@ export default function InsightsDashboard() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="lg:col-span-8 bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-xl"
+          className="lg:col-span-8 bg-black border border-white/10 rounded-2xl p-6 shadow-xl"
         >
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -119,7 +119,7 @@ export default function InsightsDashboard() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
-          className="lg:col-span-4 bg-[#0a0a0a] border border-white/10 rounded-2xl p-6 shadow-xl flex flex-col"
+          className="lg:col-span-4 bg-black border border-white/10 rounded-2xl p-6 shadow-xl flex flex-col"
         >
           <div className="mb-6">
             <h3 className="text-lg font-bold text-white flex items-center gap-2"><PlaneTakeoff className="text-yellow-400" size={18} /> Trending Destinations</h3>

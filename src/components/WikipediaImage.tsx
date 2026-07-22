@@ -5,37 +5,10 @@ export default function WikipediaImage({ title, fallbackTitle }: { title: string
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchImage() {
-      try {
-        // Try exact title first
-        let res = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${encodeURIComponent(title)}&pithumbsize=800&format=json&origin=*`);
-        let data = await res.json();
-        let pages = data.query?.pages;
-        let pageId = Object.keys(pages || {})[0];
-        
-        if (pageId && pageId !== "-1" && pages[pageId].thumbnail?.source) {
-          setImageUrl(pages[pageId].thumbnail.source);
-          return;
-        }
-
-        // If no image, try falling back to destination
-        res = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&titles=${encodeURIComponent(fallbackTitle)}&pithumbsize=800&format=json&origin=*`);
-        data = await res.json();
-        pages = data.query?.pages;
-        pageId = Object.keys(pages || {})[0];
-        
-        if (pageId && pageId !== "-1" && pages[pageId].thumbnail?.source) {
-          setImageUrl(pages[pageId].thumbnail.source);
-        } else {
-          // Ultimate visual fallback if Wikipedia has absolutely no images for this place
-          setImageUrl(`https://picsum.photos/seed/${fallbackTitle.replace(/\s+/g, '')}/800/400`);
-        }
-      } catch (e) {
-        setImageUrl(`https://picsum.photos/seed/${fallbackTitle.replace(/\s+/g, '')}/800/400`);
-      }
-    }
-    
-    fetchImage();
+    // We are strictly using Gemini for data, so we remove the Wikipedia image API entirely.
+    // Instead, we instantly generate a visually pleasing generic seeded image.
+    const seed = (title || fallbackTitle).replace(/\s+/g, '');
+    setImageUrl(`https://picsum.photos/seed/${seed}/800/400`);
   }, [title, fallbackTitle]);
 
   if (!imageUrl) return <div className="absolute inset-0 bg-slate-900 animate-pulse opacity-10 pointer-events-none"></div>;
