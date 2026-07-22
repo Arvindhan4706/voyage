@@ -6,7 +6,7 @@
 +-------------------------------------------------------------+
 |                     PRESENTATION LAYER                      |
 |                Next.js 16 + Tailwind CSS v4                 |
-|             (Live UI: voyage-ai-red.vercel.app)             |
+|            (Live UI: voyage-liart-six.vercel.app)           |
 +-------------------------------------------------------------+
                               |
                      REST API | JSON Payload

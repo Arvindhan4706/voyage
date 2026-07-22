@@ -34,7 +34,7 @@
    +-------------------------------+   +-------------------------------+
    |        Vercel Cloud           |   |       Render / Docker         |
    |   Next.js 16 Production UI    |   |    FastAPI ML Service (8000)  |
-   | https://voyage-ai-red.vercel.app |   |   Model Artifacts (v1.0)     |
+   | https://voyage-liart-six.vercel.app | |   Model Artifacts (v1.0)     |
    +-------------------------------+   +-------------------------------+
 ```
 
@@ -99,7 +99,7 @@ jobs:
 
 ## 5. Deployment Guide & URLs
 
-* **Live Frontend Web App**: [https://voyage-ai-red.vercel.app](https://voyage-ai-red.vercel.app)
+* **Live Frontend Web App**: [https://voyage-liart-six.vercel.app](https://voyage-liart-six.vercel.app)
 * **GitHub Repository**: [https://github.com/Arvindhan4706/voyage](https://github.com/Arvindhan4706/voyage)
 * **Local Quickstart**:
 ```bash

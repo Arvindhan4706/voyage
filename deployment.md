@@ -43,6 +43,6 @@ Once your Python backend is live, copy its URL and paste it into Vercel as `NEXT
 
 ## Final Checklist
 - [ ] Database migrated to PostgreSQL.
-- [ ] Next.js deployed on Vercel.
+- [ ] Next.js deployed on Vercel ([https://voyage-liart-six.vercel.app](https://voyage-liart-six.vercel.app)).
 - [ ] FastAPI deployed on Render.
 - [ ] API routes updated to point to the live backend URL.

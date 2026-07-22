@@ -1,30 +1,27 @@
+import sys
 from fastapi import FastAPI
 from pydantic import BaseModel
 import pickle
 import os
+import __main__
 
 app = FastAPI(title="VoyageAI Price Predictor MLOps Backend")
 
-# We define a dummy regressor class here so pickle can load it
-import math
-class SimpleLinearRegressor:
-    def __init__(self):
-        self.weights = []
-        self.bias = 0
-        self.features = []
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
 
-    def predict(self, X):
-        X_norm = [[(x - m)/s for x, m, s in zip(row, self.means, self.stds)] for row in X]
-        return [sum(w * x for w, x in zip(self.weights, row)) + self.bias for row in X_norm]
+from train import SimpleLinearRegressor
+__main__.SimpleLinearRegressor = SimpleLinearRegressor
 
 # Load model globally on startup
-MODEL_PATH = "models/baseline_model_v1.pkl"
+MODEL_PATH = os.path.join(BASE_DIR, "models", "baseline_model_v1.pkl")
 try:
     with open(MODEL_PATH, "rb") as f:
         model = pickle.load(f)
 except Exception as e:
     model = None
-    print(f"Warning: Could not load model: {e}")
+    print(f"Warning: Could not load model from {MODEL_PATH}: {e}")
 
 class PredictionRequest(BaseModel):
     distance_km: float

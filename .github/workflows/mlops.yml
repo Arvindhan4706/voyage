@@ -29,6 +29,11 @@ jobs:
         python generate_data.py
         python train.py
 
+    - name: Run Unit & API Tests
+      run: |
+        cd ml
+        python -m pytest test_ml.py
+
     - name: Build Docker Image
       run: |
         cd ml

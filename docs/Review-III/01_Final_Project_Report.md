@@ -17,7 +17,7 @@ Airline ticket pricing is notoriously dynamic and volatile. Voyage AI solves thi
 ## 4. Results
 * **Inference Latency**: Average response time of **24 ms** per prediction.
 * **Container Build Time**: **8.4 seconds** total image build time.
-* **UI Integration**: Live Next.js frontend deployed on Vercel ([https://voyage-ai-red.vercel.app](https://voyage-ai-red.vercel.app)).
+* **UI Integration**: Live Next.js frontend deployed on Vercel ([https://voyage-liart-six.vercel.app](https://voyage-liart-six.vercel.app)).
 
 ## 5. Conclusion
 Voyage AI demonstrates a complete 100% production-grade MLOps lifecycle from initial dataset acquisition to continuous cloud deployment and drift monitoring.

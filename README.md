@@ -1,7 +1,7 @@
 # 🌍 Voyage AI — Intelligent Travel Dashboard
 
-[![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-voyage--ai--red.vercel.app-blue?style=for-the-badge)](https://voyage-ai-red.vercel.app)
-[![GitHub](https://img.shields.io/badge/GitHub-Arvindhan4706%2Fvoyage--ai-black?style=for-the-badge&logo=github)](https://github.com/Arvindhan4706/voyage-ai)
+[![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-voyage--liart--six.vercel.app-blue?style=for-the-badge)](https://voyage-liart-six.vercel.app)
+[![GitHub](https://img.shields.io/badge/GitHub-Arvindhan4706%2Fvoyage-black?style=for-the-badge&logo=github)](https://github.com/Arvindhan4706/voyage)
 [![Next.js](https://img.shields.io/badge/Next.js-16.2-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
 [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com)
 
@@ -9,9 +9,10 @@
 
 ## 🌐 Live Website
 
-**👉 [https://voyage-ai-red.vercel.app](https://voyage-ai-red.vercel.app)**
+**👉 [https://voyage-liart-six.vercel.app](https://voyage-liart-six.vercel.app)**
 
 ---
+
 
 ## ✨ Features
 

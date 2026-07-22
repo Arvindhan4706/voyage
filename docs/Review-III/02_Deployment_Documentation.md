@@ -17,7 +17,7 @@ docker run -d -p 8000:8000 --name voyage-ml-service voyage-ai-mlops:v1.0
 ## 2. Cloud Deployment Topology
 * **Frontend Hosting (Vercel)**:
   * **Platform**: Vercel Cloud Serverless Edge
-  * **Live URL**: [https://voyage-ai-red.vercel.app](https://voyage-ai-red.vercel.app)
+  * **Live URL**: [https://voyage-liart-six.vercel.app](https://voyage-liart-six.vercel.app)
   * **Environment Variables**: `NEXT_PUBLIC_API_URL` pointing to backend REST API.
 * **Backend Hosting (Render / Railway)**:
   * **Platform**: Render Cloud Container Web Service
