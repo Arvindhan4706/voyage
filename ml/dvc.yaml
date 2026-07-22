@@ -1,0 +1,22 @@
+stages:
+  generate_data:
+    cmd: python generate_data.py
+    deps:
+    - generate_data.py
+    outs:
+    - data/flight_prices.csv
+
+  train:
+    cmd: python train.py
+    deps:
+    - train.py
+    - data/flight_prices.csv
+    outs:
+    - models/baseline_model_v1.pkl
+
+  evaluate_and_monitor:
+    cmd: python monitor.py
+    deps:
+    - monitor.py
+    - data/flight_prices.csv
+    - models/baseline_model_v1.pkl
